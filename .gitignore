@@ -101,5 +101,4 @@ ENV/
 .imdone
 translate_emolex
 
-# Scratches
-scratch
+syuzhet/treetagger-mac
