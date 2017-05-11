@@ -1,3 +1,4 @@
+from flask import Flask
 import treetaggerwrapper as ttw
 import pickle
 
@@ -24,8 +25,10 @@ with open(emolex_abs_path, 'rb') as f:
 tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
                         TAGDIR=cmgr.get_treetagger_path())
 
-analyzer = syuzhet.Syuzhet(language, tagger, emotions_array_length, emolex)
+app = Flask(__name__)
 
-text = "Ciao, caro amico. Vorrei dirti qualcosa che crea gioia."
 
-result = analyzer.analyze_text(text)
+@app.route('/')
+def show_help():
+    """Show the help readme."""
+    return "Help!"

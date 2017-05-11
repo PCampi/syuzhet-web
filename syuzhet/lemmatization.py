@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """Lemmatization module."""
 
 import treetaggerwrapper as ttw

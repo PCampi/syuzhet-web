@@ -1,7 +1,8 @@
 """Configuration manager for the Syuzhet module."""
 
+import platform
 import json
-from .path_problem_resolver import get_absolute_path
+from path_problem_resolver import get_absolute_path
 
 config_file = "config.json"
 
@@ -12,10 +13,13 @@ class ConfigurationManager():
     def __init__(self, path_to_file=config_file):
         """Init."""
         self.path_to_file = get_absolute_path(path_to_file)
-        self.conf_dict = dict()
+        self.conf_dict = None
 
-    def load_config(self):
+    def load_config(self, path_to_file=config_file):
         """Load the configuration file from the specified path."""
+        if path_to_file:
+            self.path_to_file = get_absolute_path(path_to_file)
+
         try:
             with open(self.path_to_file) as conf:
                 self.conf_dict = json.load(conf)
@@ -24,8 +28,15 @@ class ConfigurationManager():
 
     def get_treetagger_path(self):
         """Get the path of the treetagger directory."""
+        os_name = platform.system()
+
+        if os_name == "Darwin":
+            key = 'treetagger_dir_mac'
+        elif os_name == "Linux" or os_name == "linux":
+            key = 'treetagger_dir_linux'
+
         try:
-            return self.conf_dict['treetagger_dir']
+            return self.conf_dict[key]
         except KeyError as e:
             raise e
 
@@ -50,17 +61,24 @@ class ConfigurationManager():
         except Exception as e:
             raise e
 
-    def get_emolex_path(self, language):
+    def get_emolex_filename(self, language):
         """Get the path of the EmoLex lexicon file for specified language."""
         if language == self.get_default_language():
-            key = 'emolex_it_path'
+            key = 'emolex_it_filename'
         elif language == self.get_secondary_language():
-            key = 'emolex_en_path'
+            key = 'emolex_en_filename'
         else:
             raise Exception("Invalid language '{}': only italian or english"
                             .format(language))
 
         try:
             return self.conf_dict[key]
+        except Exception as e:
+            raise e
+
+    def get_data_dir(self):
+        """Get the name of the data directory."""
+        try:
+            return self.conf_dict['data_dir']
         except Exception as e:
             raise e
