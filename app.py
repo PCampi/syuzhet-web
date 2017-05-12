@@ -1,11 +1,11 @@
-from flask import Flask, send_from_directory
+from flask import Flask, request, jsonify
 import treetaggerwrapper as ttw
 import pickle
+import pudb
 
 import syuzhet
 from path_problem_resolver import get_absolute_path
 from configuration_manager import ConfigurationManager
-# import pudb
 
 cmgr = ConfigurationManager("config.json")
 cmgr.load_config()
@@ -36,4 +36,26 @@ app = Flask(__name__)
 def show_readme():
     """Show the help readme."""
     return app.send_static_file('Readme.html')
-    # return send_from_directory('static', 'Readme.html')
+
+
+@app.route('/test/tokenization', methods=['POST'])
+def test_json_tokenization():
+    json_contents = request.get_json()
+
+    pudb.set_trace()
+    if json_contents:
+        try:
+            sentences = json_contents['contents']  # list of lists of str
+            from syuzhet.lemmatization import lemmatize
+            lemmatized_text = [lemmatize(s, tagger) for s in sentences]
+            result = {'lemmatized_sentences': lemmatized_text}
+            return jsonify(result)
+        except KeyError as e:
+            raise e
+
+    else:
+        raise Exception("No contents in the JSON!")
+
+
+if __name__ == "__main__":
+    app.run()

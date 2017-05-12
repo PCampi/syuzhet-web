@@ -11,6 +11,9 @@ def lemmatize(sentence, tagger):
     sentence: list of strings
         a sentence represented as a list of strings, each of which is a word
 
+    tagger: treetaggerwrapper
+        instance of TreeTagger to use for lemmatization
+
     Returns
     -------
     lemmas: list
