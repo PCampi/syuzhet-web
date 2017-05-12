@@ -26,6 +26,6 @@ tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
 
 analyzer = syuzhet.Syuzhet(language, tagger, emotions_array_length, emolex)
 
-text = "Ciao, caro amico. Vorrei dirti qualcosa che crea gioia."
+text = "Ciao, caro amico. Vorrei dirti qualcosa che crea gioia. Anche se ti sembra che sia spaventoso, non temere!"
 
 result = analyzer.analyze_text(text)

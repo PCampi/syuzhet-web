@@ -82,3 +82,9 @@ class ConfigurationManager():
             return self.conf_dict['data_dir']
         except Exception as e:
             raise e
+
+    def get_emotion_names(self):
+        try:
+            return self.conf_dict['emotion_names']
+        except KeyError as e:
+            raise e

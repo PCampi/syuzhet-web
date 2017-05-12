@@ -47,8 +47,9 @@ class Syuzhet():
         sentence_emotions = [self.emotions_for_sentence(s)
                              for s in filtered_sentences]
 
-        result = reduce((lambda x, y: x + y), sentence_emotions)
-        return {'aggregate': result, 'sentences': sentence_emotions}
+        result = reduce((lambda x, y: x + y), sentence_emotions).tolist()
+        return {'aggregate': result,
+                'sentences': [arr.tolist() for arr in sentence_emotions]}
 
     def emotions_for_sentence(self, sentence):
         """Get the emotions in a sentence.
