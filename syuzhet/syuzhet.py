@@ -1,21 +1,17 @@
 """Main Syuzhet module."""
 
-import pudb
 from functools import reduce
-
 import numpy as np
 
 from .splitting import TextSplitter
-from . import lemmatization
+from .lemmatization import lemmatize
 
 
 class Syuzhet():
     """Syuzhet text analyzer class."""
 
     def __init__(self, language, tagger, emotions_array_length, emolex):
-        """Initialize the class.
-
-        emolex_path must be absolute!"""
+        """Initialize the class."""
         self.language = language
         self.tagger = tagger
         self.emotions_array_length = emotions_array_length
@@ -41,11 +37,10 @@ class Syuzhet():
                      self.splitter.text_to_sentences(text, self.language)]
 
         # get the lemmatized sentences
-        lemmatized_sentences = [lemmatization.lemmatize(s, self.tagger)
+        lemmatized_sentences = [lemmatize(s, self.tagger)
                                 for s in sentences]
 
         # filter the lemmatized sentences: only words in EmoLex
-        pudb.set_trace()
         filtered_sentences = [[w for w in filter(self._filter_func, s)]
                               for s in lemmatized_sentences]
 
