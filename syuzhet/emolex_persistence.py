@@ -4,8 +4,6 @@ import pandas as pd
 import numpy as np
 import pickle
 
-from .path_problem_resolver import get_absolute_path
-
 it_path = "data/EmoLex_it.pickle"
 en_path = "data/EmoLex_en.pickle"
 
@@ -18,7 +16,7 @@ def _load_emolex_in_dataframe(emolex_path):
     pandas.DataFrame:
         a table containing a row for each word
     """
-    emolex = pd.read_csv(get_absolute_path(emolex_path),
+    emolex = pd.read_csv(emolex_path,
                          dtype={'Positive': np.int16,
                                 'Negative': np.int16,
                                 'Anger': np.int16,
@@ -107,15 +105,13 @@ def load_emolex(path):
 
 def save_pickle_file(object_to_save, path_to_file):
     """Save a pickle file."""
-    abs_path = get_absolute_path(path_to_file)
-    with open(abs_path, 'wb') as f:
+    with open(path_to_file, 'wb') as f:
         pickle.dump(object_to_save, f)
 
 
 def load_pickle_file(path_to_file):
     """Load a pickle file."""
-    abs_path = get_absolute_path(path_to_file)
-    with open(abs_path, 'rb') as f:
+    with open(path_to_file, 'rb') as f:
         result = pickle.load(f)
 
     return result

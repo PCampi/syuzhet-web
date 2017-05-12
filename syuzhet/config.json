@@ -1,6 +1,0 @@
-{"treetagger_dir": "/Users/pietro/Documents/Programmi/treetagger",
-	"default_language": "italian",
-	"secondary_language": "english",
-	"emotion_array_length": 10,
-	"emolex_it_path": "data/EmoLex_it.pickle",
-	"emolex_en_path": "data/EmoLex_en.pickle"}
