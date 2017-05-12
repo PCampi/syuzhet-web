@@ -54,33 +54,33 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2 id="request-format">Request format</h2>
 <p>The service accepts JSON data within an HTTP POST request. The JSON data should have the following fields:</p>
 <ul>
-<li>id (<strong>required</strong>): a number identifying the id of the sent text</li>
+<li>id: a number identifying the id of the sent text</li>
 <li>corpus: will be returned as is</li>
 <li>document: will be returned as is</li>
-<li>contents (<strong>required</strong>) : the text to analyze</li>
+<li>content (<strong>required</strong>): the text to analyze</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
     <span class="st">&quot;id&quot;</span><span class="op">:</span> number<span class="op">,</span>
     <span class="st">&quot;corpus&quot;</span><span class="op">:</span> <span class="st">&quot;name_of_corpus&quot;</span><span class="op">,</span>
     <span class="st">&quot;document&quot;</span><span class="op">:</span> <span class="st">&quot;name_of_document&quot;</span><span class="op">,</span>
-    <span class="st">&quot;contents&quot;</span><span class="op">:</span> <span class="st">&quot;Text of the document...&quot;</span>
+    <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;Text of the document...&quot;</span>
 <span class="op">}</span></code></pre></div>
 <p><strong>Warning</strong>:</p>
-<p>The only true required field of the request is the <code>contents</code> field that defines the text to analyze. All other fields are irrelevant (at the moment).</p>
+<p>The only true required field of the request is the <code>content</code> field that defines the text to analyze. All other fields are irrelevant (at the moment).</p>
 <p>Here is a sample request:</p>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
     <span class="st">&quot;id&quot;</span><span class="op">:</span> <span class="dv">13</span><span class="op">,</span>
     <span class="st">&quot;corpus&quot;</span><span class="op">:</span> <span class="st">&quot;paziente X&quot;</span><span class="op">,</span>
     <span class="st">&quot;document&quot;</span><span class="op">:</span> <span class="st">&quot;Diario del giorno 22/03/2017&quot;</span><span class="op">,</span>
-    <span class="st">&quot;contents&quot;</span><span class="op">:</span> <span class="st">&quot;Stamattina mi sono svegliato con un gran mal di testa.</span><span class="sc">\n</span><span class="st">Ci sono voluti venti minuti per...&quot;</span>
+    <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;Stamattina mi sono svegliato con un gran mal di testa.</span><span class="sc">\n</span><span class="st">Ci sono voluti venti minuti per...&quot;</span>
 <span class="op">}</span></code></pre></div>
 <h2 id="response-format">Response format</h2>
 <p>The service will answer with a JSON formatted as follows:</p>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
-    <span class="st">&quot;id&quot;</span><span class="op">:</span> number<span class="op">,</span>
-    <span class="st">&quot;corpus&quot;</span><span class="op">:</span> <span class="st">&quot;the corpus name&quot;</span><span class="op">,</span>
-    <span class="st">&quot;document&quot;</span><span class="op">:</span> <span class="st">&quot;the document name&quot;</span><span class="op">,</span>
-    <span class="st">&quot;results&quot;</span><span class="op">:</span> <span class="op">{</span>
+    <span class="st">&quot;id&quot;</span><span class="op">:</span> number<span class="op">,</span> <span class="co">// if present in request</span>
+    <span class="st">&quot;corpus&quot;</span><span class="op">:</span> <span class="st">&quot;the corpus name&quot;</span><span class="op">,</span> <span class="co">// if present in request</span>
+    <span class="st">&quot;document&quot;</span><span class="op">:</span> <span class="st">&quot;the document name&quot;</span><span class="op">,</span> <span class="co">// if present in request</span>
+    <span class="st">&quot;result&quot;</span><span class="op">:</span> <span class="op">{</span>
         <span class="st">&quot;emotion-names&quot;</span><span class="op">:</span> [array of Strings mapping the emotion names]<span class="op">,</span>
         <span class="st">&quot;aggregate&quot;</span><span class="op">:</span> [array of <span class="dv">10</span> values<span class="op">,</span> one <span class="cf">for</span> each emotion]<span class="op">,</span>
         <span class="st">&quot;emotions-for-sentence&quot;</span><span class="op">:</span> [[<span class="dv">10</span> values <span class="cf">for</span> sentence <span class="dv">1</span>]<span class="op">,</span>
