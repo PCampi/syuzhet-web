@@ -1,1 +1,1 @@
-web: gunicorn app:app --log-file - #gettingstarted.wsgi --log-file -
+web: gunicorn --workers=4 --worker-class=sync --preload --log-file=- app:app
