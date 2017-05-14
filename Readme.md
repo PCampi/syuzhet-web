@@ -47,8 +47,8 @@ The service will answer with a JSON formatted as follows:
     "id": number, // if present in request
     "corpus": "the corpus name", // if present in request
     "document": "the document name", // if present in request
+    "emotion-names": [array of Strings mapping the emotion names],
     "result": {
-        "emotion-names": [array of Strings mapping the emotion names],
         "aggregate": [array of 10 values, one for each emotion],
         "emotions-for-sentence": [[10 values for sentence 1],
                                 [10 values for sentence 2],
