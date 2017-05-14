@@ -104,3 +104,4 @@ translate_emolex
 syuzhet/treetagger-mac
 
 profile-gunicorn.sh
+.env
