@@ -42,17 +42,19 @@
     <script>
         $(document).ready(function() {
             $('#send_text_button').on('click', function () {
-                console.log($('#text_input').val());
+                data_to_send = JSON.stringify({"content": String($("#text_input").val())})
+                console.log(data_to_send);
 
                 $.ajax({
                     url: 'http://127.0.0.1:8000/analyze',
                     cache: false,
                     type: 'POST',
+                    data : data_to_send,
+                    contentType: 'application/json; charset=utf-8',
                     dataType: 'json',
-                    contentType: 'application/json',
-                    data : {"content": String($("#text_input").val())},
                     success: function(json) {
                         console.log('Done!');
+                        console.log(json);
                     },
                     error: function(req, textStatus, errorThrown) {
                         console.log(req);
