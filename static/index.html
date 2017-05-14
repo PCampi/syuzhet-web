@@ -25,43 +25,43 @@
         Fill the form below to start analyzing emotions in texts!
     </p>
 
-    <form action="#" style="margin: 0 auto; width: 100%;" id="myForm">
+    <form style="margin: 0 auto; width: 100%;" id="myForm">
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="min-width: 80%">
-            <textarea class="mdl-textfield__input" type="text" rows="3" id="sample5"
+            <textarea class="mdl-textfield__input" type="text" rows="3" id="text_input"
             name="content"></textarea>
-            <label class="mdl-textfield__label" for="sample5">Text to analyze...</label>
+            <label class="mdl-textfield__label" for="text_input">Text to analyze...</label>
         </div>
 
         <div>
-            <input type="submit"
+            <input type="button"
             class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
-            value="Send text" id="send_text"/>
+            value="Send text" id="send_text_button"/>
         </div>
     </form>
 
     <script>
-        function send_text() {
-            var formData = JSON.stringify($("#myForm").serializeArray());
-            console.log(formData)
+        $(document).ready(function() {
+            $('#send_text_button').on('click', function () {
+                console.log($('#text_input').val());
 
-            $('#send_text').on('click', function () {
                 $.ajax({
-                    url: '127.0.0.1:8000/analyze',
+                    url: 'http://127.0.0.1:8000/analyze',
                     cache: false,
                     type: 'POST',
                     dataType: 'json',
                     contentType: 'application/json',
-                    data : $('#myForm').serialize(),
+                    data : {"content": String($("#text_input").val())},
                     success: function(json) {
                         console.log('Done!');
                     },
                     error: function(req, textStatus, errorThrown) {
+                        console.log(req);
                         console.log(textStatus);
                         console.log(errorThrown);
                     }
                 });
             });
-        }
+        });
     </script>
 </body>
 

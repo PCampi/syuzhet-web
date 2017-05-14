@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import cross_origin
 import treetaggerwrapper as ttw
 import pickle
 
@@ -38,25 +39,15 @@ def show_readme():
     return app.send_static_file('Readme.html')
 
 
-# @app.route('/test/tokenization', methods=['POST'])
-# def test_json_tokenization():
-#     json_contents = request.get_json()
-#
-#     if json_contents:
-#         try:
-#             sentences = json_contents['contents']  # list of lists of str
-#             from syuzhet.lemmatization import lemmatize
-#             lemmatized_text = [lemmatize(s, tagger) for s in sentences]
-#             result = {'lemmatized_sentences': lemmatized_text}
-#             return jsonify(result)
-#         except KeyError as e:
-#             raise e
-#
-#     else:
-#         raise Exception("No contents in the JSON!")
+@app.route('/gui-test', methods=['GET'])
+@cross_origin()
+def send_gui_test():
+    """Sent the static index page."""
+    return app.send_static_file('index.html')
 
 
 @app.route('/analyze', methods=['POST'])
+@cross_origin()
 def analyze_text():
     """Analyze a text and send response."""
     req_contents = request.get_json()
