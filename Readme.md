@@ -3,6 +3,13 @@
 ## Introduction
 This document explains how to use the Syuzhet web api.
 
+## Endpoints
+The API exposes the following endpoints:
+
+-   [https://syuzhet-web.herokuapp.com/](https://syuzhet-web.herokuapp.com/): main entry point where you can find this help;
+-   [https://syuzhet-web.herokuapp.com/analyze](https://syuzhet-web.herokuapp.com/analyze): RESTFul endpoint to analyze a text, must send a POST request with JSON content (see below for an example);
+-   [https://syuzhet-web.herokuapp.com/gui-test](https://syuzhet-web.herokuapp.com/gui-test): sample implementation of a GUI;
+
 ## Request format
 The service accepts JSON data within an HTTP POST request.
 The JSON data should have the following fields:
@@ -26,8 +33,8 @@ The JSON data should have the following fields:
 
 The only true required field of the request is the `content` field that defines the text to analyze. All other fields are irrelevant (at the moment).
 
-
-Here is a sample request:
+### Example request
+Here is a sample request object,
 
 ```javascript
 {
@@ -38,6 +45,28 @@ Here is a sample request:
 }
 ```
 
+and here is jQuery code to analyze a text
+
+```javascript
+// IMPORTANT! make a JSON string from the content of a JSON object
+data_to_send = JSON.stringify({"content": "Text to analyze..."})
+
+// use jQuery $.ajax to send and receive async requests
+$.ajax({
+    url: 'https://syuzhet-web.herokuapp.com/analyze',
+    cache: false,
+    type: 'POST', // don't forget this!
+    data : data_to_send,
+    contentType: 'application/json; charset=utf-8', // don't forget this!
+    dataType: 'json',
+    success: function(json_response) {
+        // client code to execute in case of success
+    },
+    error: function(request, textStatus, errorThrown) {
+        // client code to execute in case of error
+    }
+});
+```
 
 ## Response format
 The service will answer with a JSON formatted as follows:
@@ -50,7 +79,7 @@ The service will answer with a JSON formatted as follows:
     "emotion-names": [array of Strings mapping the emotion names],
     "result": {
         "aggregate": [array of 10 values, one for each emotion],
-        "emotions-for-sentence": [[10 values for sentence 1],
+        "sentences": [[10 values for sentence 1],
                                 [10 values for sentence 2],
                                 [10 values for sentence 3], ...]
     }
