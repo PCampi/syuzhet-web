@@ -51,6 +51,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1 id="syuzhet-web-service">Syuzhet web service</h1>
 <h2 id="introduction">Introduction</h2>
 <p>This document explains how to use the Syuzhet web api.</p>
+<h2 id="endpoints">Endpoints</h2>
+<p>The API exposes the following endpoints:</p>
+<ul>
+<li><a href="https://syuzhet-web.herokuapp.com/" class="uri">https://syuzhet-web.herokuapp.com/</a>: main entry point where you can find this help;</li>
+<li><a href="https://syuzhet-web.herokuapp.com/analyze" class="uri">https://syuzhet-web.herokuapp.com/analyze</a>: RESTFul endpoint to analyze a text, must send a POST request with JSON content (see below for an example);</li>
+<li><a href="https://syuzhet-web.herokuapp.com/gui-test" class="uri">https://syuzhet-web.herokuapp.com/gui-test</a>: sample implementation of a GUI;</li>
+</ul>
 <h2 id="request-format">Request format</h2>
 <p>The service accepts JSON data within an HTTP POST request. The JSON data should have the following fields:</p>
 <ul>
@@ -67,13 +74,33 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="op">}</span></code></pre></div>
 <p><strong>Warning</strong>:</p>
 <p>The only true required field of the request is the <code>content</code> field that defines the text to analyze. All other fields are irrelevant (at the moment).</p>
-<p>Here is a sample request:</p>
+<h3 id="example-request">Example request</h3>
+<p>Here is a sample request object,</p>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
     <span class="st">&quot;id&quot;</span><span class="op">:</span> <span class="dv">13</span><span class="op">,</span>
     <span class="st">&quot;corpus&quot;</span><span class="op">:</span> <span class="st">&quot;paziente X&quot;</span><span class="op">,</span>
     <span class="st">&quot;document&quot;</span><span class="op">:</span> <span class="st">&quot;Diario del giorno 22/03/2017&quot;</span><span class="op">,</span>
     <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;Stamattina mi sono svegliato con un gran mal di testa.</span><span class="sc">\n</span><span class="st">Ci sono voluti venti minuti per...&quot;</span>
 <span class="op">}</span></code></pre></div>
+<p>and here is jQuery code to analyze a text</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="co">// IMPORTANT! make a JSON string from the content of a JSON object</span>
+data_to_send <span class="op">=</span> <span class="va">JSON</span>.<span class="at">stringify</span>(<span class="op">{</span><span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;Text to analyze...&quot;</span><span class="op">}</span>)
+
+<span class="co">// use jQuery $.ajax to send and receive async requests</span>
+<span class="va">$</span>.<span class="at">ajax</span>(<span class="op">{</span>
+    <span class="dt">url</span><span class="op">:</span> <span class="st">&#39;https://syuzhet-web.herokuapp.com/analyze&#39;</span><span class="op">,</span>
+    <span class="dt">cache</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span>
+    <span class="dt">type</span><span class="op">:</span> <span class="st">&#39;POST&#39;</span><span class="op">,</span> <span class="co">// don&#39;t forget this!</span>
+    <span class="dt">data </span><span class="op">:</span> data_to_send<span class="op">,</span>
+    <span class="dt">contentType</span><span class="op">:</span> <span class="st">&#39;application/json; charset=utf-8&#39;</span><span class="op">,</span> <span class="co">// don&#39;t forget this!</span>
+    <span class="dt">dataType</span><span class="op">:</span> <span class="st">&#39;json&#39;</span><span class="op">,</span>
+    <span class="dt">success</span><span class="op">:</span> <span class="kw">function</span>(json_response) <span class="op">{</span>
+        <span class="co">// client code to execute in case of success</span>
+    <span class="op">},</span>
+    <span class="dt">error</span><span class="op">:</span> <span class="kw">function</span>(request<span class="op">,</span> textStatus<span class="op">,</span> errorThrown) <span class="op">{</span>
+        <span class="co">// client code to execute in case of error</span>
+    <span class="op">}</span>
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
 <h2 id="response-format">Response format</h2>
 <p>The service will answer with a JSON formatted as follows:</p>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
@@ -83,7 +110,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
     <span class="st">&quot;emotion-names&quot;</span><span class="op">:</span> [array of Strings mapping the emotion names]<span class="op">,</span>
     <span class="st">&quot;result&quot;</span><span class="op">:</span> <span class="op">{</span>
         <span class="st">&quot;aggregate&quot;</span><span class="op">:</span> [array of <span class="dv">10</span> values<span class="op">,</span> one <span class="cf">for</span> each emotion]<span class="op">,</span>
-        <span class="st">&quot;emotions-for-sentence&quot;</span><span class="op">:</span> [[<span class="dv">10</span> values <span class="cf">for</span> sentence <span class="dv">1</span>]<span class="op">,</span>
+        <span class="st">&quot;sentences&quot;</span><span class="op">:</span> [[<span class="dv">10</span> values <span class="cf">for</span> sentence <span class="dv">1</span>]<span class="op">,</span>
                                 [<span class="dv">10</span> values <span class="cf">for</span> sentence <span class="dv">2</span>]<span class="op">,</span>
                                 [<span class="dv">10</span> values <span class="cf">for</span> sentence <span class="dv">3</span>]<span class="op">,</span> ...]
     <span class="op">}</span>
