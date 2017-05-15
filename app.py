@@ -23,11 +23,6 @@ emolex_abs_path = get_absolute_path('syuzhet/'
 with open(emolex_abs_path, 'rb') as f:
     emolex = pickle.load(f)
 
-tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
-                        TAGDIR=cmgr.get_treetagger_path())
-
-analyzer = syuzhet.Syuzhet(language, tagger, emotions_array_length, emolex)
-
 
 # Main application
 app = Flask(__name__)
@@ -54,7 +49,16 @@ def analyze_text():
 
     if req_contents:
         text_to_analyze = req_contents['content']
+
+        tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
+                                TAGDIR=cmgr.get_treetagger_path())
+
+        analyzer = syuzhet.Syuzhet(language, tagger,
+                                   emotions_array_length, emolex)
         analysis_result = analyzer.analyze_text(text_to_analyze)
+
+        analyzer = None
+        tagger = None
 
         result_dict = make_result_dict(analysis_result,
                                        emo_names=emotion_names)
