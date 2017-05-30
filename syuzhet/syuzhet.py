@@ -18,7 +18,7 @@ class Syuzhet():
         self.emolex = emolex
         self.splitter = TextSplitter()
 
-    def analyze_text(self, text):
+    def analyze_text(self, text: str):
         """Extract emotions from a text.
 
         Parameters
