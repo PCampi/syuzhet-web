@@ -7,5 +7,5 @@
 	"data_dir": "data",
 	"emolex_it_filename": "EmoLex_it.pickle",
 	"emolex_en_filename": "EmoLex_en.pickle",
-	"emotion_names": ["Positive","Negative","Anger","Anticipation","Disgust","Fear","Joy","Sadness","Surprise","Trust"]
+	"emotion_names": ["Positivo","Negativo","Rabbia","Anticipazione","Disgusto","Paura","Gioia","Tristezza","Sorpresa","Fiducia"]
 }
