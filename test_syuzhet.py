@@ -1,10 +1,13 @@
 import pickle
 import unittest
+import numpy as np
 import treetaggerwrapper as ttw
 
 from configuration_manager import ConfigurationManager
 from path_problem_resolver import get_absolute_path
 from syuzhet import Syuzhet
+from syuzhet.splitting import TextSplitter
+from syuzhet.lemmatization import Lemmatizer
 
 
 class SyuzhetUnitTest(unittest.TestCase):
@@ -24,9 +27,11 @@ class SyuzhetUnitTest(unittest.TestCase):
         emolex_filename = cmgr.get_emolex_filename(cls.language)
         emolex_abs_path = get_absolute_path('syuzhet/' + data_dir +
                                             '/' + emolex_filename)
+        cls.splitter = TextSplitter(cls.language)
         taglang = cls.language.lower()[0:2]
         cls.tagger = ttw.TreeTagger(TAGLANG=taglang,
                                     TAGDIR=cls.treetagger_dir)
+        cls.lemmatizer = Lemmatizer(cls.tagger)
 
         with open(emolex_abs_path, 'rb') as f:
             cls.emolex = pickle.load(f)
@@ -48,29 +53,39 @@ class SyuzhetUnitTest(unittest.TestCase):
     def tearDown(self):
         self.analyzer = None
 
-    @classmethod
-    def tearDownClass(cls):
-        pass
+    def test_filter_func(self):
+        """Test that it filters all the words which have zero emotions."""
+        with open("test_data/Ragazzo da parete - cap 1.txt", "r") as f:
+            text = f.read()
 
-    def test_emolex_value_for_word(self):
-        """Test for the `_emolex_value_for_word` function."""
+        sentences = [self.splitter.sentence_to_words(sentence)
+                     for sentence in self.splitter.text_to_sentences(text)]
+
+        lemmatized_sentences = [self.lemmatizer.lemmatize(s)
+                                for s in sentences]
+        words_in_emolex = [[w for w in sent if w in self.emolex]
+                           for sent in lemmatized_sentences]
+        words_with_valence = [[w for w in sent
+                               if self.emotion_count_for_word(w) > 0]
+                              for sent in words_in_emolex]
+        result = self.analyzer.filter_sentences(lemmatized_sentences)
+
+        self.assertEqual(words_with_valence, result,
+                         "Filtered words are different.")
+
+    def test_emotions_for_sentence(self):
         self.fail("Write test.")
+        # sentence = ['amico', ',', 'avere', 'voglia', 'di', 'gelato']
 
-    def test_get_emotions_for_word(self):
-        """Test for the `_get_emotions_for_word` function."""
-        # self.fail("Write test.")
+    def emotion_count_for_word(self, word):
+        emos = self.emolex[word]
+        if len(emos) == 1:
+            return np.sum(emos[0])
+        else:
+            is_valid = 0
+            i = 0
+            while i < len(emos) and is_valid == 0:
+                is_valid = np.sum(emos[i])
+                i = i + 1
 
-        for word in self.emolex:
-            self.assertIn(word, self.emolex)
-
-        test_words = ['ciao', 'come', 'stare', 'gioia', 'paura']
-        for word in test_words:
-            if word in self.emolex:
-                self.assertIsNotNone(self.analyzer._get_emotions_for_word(
-                    word),
-                                     "Reporting wrong None for word {}"
-                                     .format(word))
-            else:
-                self.assertIsNone(self.analyzer._get_emotions_for_word(word),
-                                  "Reporting not None for word \"{}\""
-                                  .format(word))
+            return is_valid
