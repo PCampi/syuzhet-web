@@ -3,22 +3,25 @@
 import treetaggerwrapper as ttw
 
 
-def lemmatize(sentence, tagger):
-    """Lemmatize a sentence using TreeTagger.
+class Lemmatizer():
+    """Sentence lemmatizer."""
 
-    Parameters
-    ----------
-    sentence: list of strings
-        a sentence represented as a list of strings, each of which is a word
+    def __init__(self, tagger):
+        self.tagger = tagger
 
-    tagger: treetaggerwrapper
-        instance of TreeTagger to use for lemmatization
+    def lemmatize(self, sentence):
+        """Lemmatize a sentence using TreeTagger.
 
-    Returns
-    -------
-    lemmas: list
-        a list with the same length as sentence, with each word substituted
-        by its lemma
-    """
-    raw_tags = tagger.tag_text(sentence, tagonly=True)
-    return [tag.lemma for tag in ttw.make_tags(raw_tags)]
+        Parameters
+        ----------
+        sentence: list of strings
+            a sentence as a list of strings, each of which is a word
+
+        Returns
+        -------
+        lemmas: list
+            a list with the same length as sentence, with each word substituted
+            by its lemma
+        """
+        raw_tags = self.tagger.tag_text(sentence, tagonly=True)
+        return [tag.lemma for tag in ttw.make_tags(raw_tags)]
