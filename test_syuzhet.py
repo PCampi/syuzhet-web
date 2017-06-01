@@ -66,18 +66,38 @@ class SyuzhetUnitTest(unittest.TestCase):
         words_in_emolex = [[w for w in sent if w in self.emolex]
                            for sent in lemmatized_sentences]
         words_with_valence = [[w for w in sent
-                               if self.emotion_count_for_word(w) > 0]
+                               if self._emotion_count_for_word(w) > 0]
                               for sent in words_in_emolex]
         result = self.analyzer.filter_sentences(lemmatized_sentences)
 
         self.assertEqual(words_with_valence, result,
                          "Filtered words are different.")
 
-    def test_emotions_for_sentence(self):
-        self.fail("Write test.")
-        # sentence = ['amico', ',', 'avere', 'voglia', 'di', 'gelato']
+    def test_emotions_for_sentence1(self):
+        text = "Ho perso il mio anello di matrimonio."
+        result, expected_result = self._compute_emotions_for_text(text)
+        self.assertListOfNdarrayEqual(result, expected_result,
+                                      "Results differ")
 
-    def emotion_count_for_word(self, word):
+    def test_emotions_for_sentence2(self):
+        text = "Ho perso il mio anello di matrimonio. Sono distrutta."
+        result, expected_result = self._compute_emotions_for_text(text)
+        self.assertListOfNdarrayEqual(result, expected_result,
+                                      "Computed emotions differ.")
+
+    def test_analyze_text_compare(self):
+        text1 = "Ho perso il mio anello di matrimonio."
+        text2 = "Ho perso il mio anello di matrimonio. Sono distrutta."
+
+        result1, expected_result1 = self._compute_emotions_for_text(text1)
+
+        result2, expected_result2 = self._compute_emotions_for_text(text2)
+
+        self.assertSumOfNdarrayListsNotEqual(result1, result2)
+        self.assertSumOfNdarrayListsNotEqual(expected_result1,
+                                             expected_result2)
+
+    def _emotion_count_for_word(self, word):
         emos = self.emolex[word]
         if len(emos) == 1:
             return np.sum(emos[0])
@@ -89,3 +109,77 @@ class SyuzhetUnitTest(unittest.TestCase):
                 i = i + 1
 
             return is_valid
+
+    def _compute_emotions_for_text(self, text):
+        sentences = [self.splitter.sentence_to_words(s)
+                     for s in self.splitter.text_to_sentences(text)]
+        lemmatized = [self.lemmatizer.lemmatize(s) for s in sentences]
+        computed_result = [self.analyzer.emotions_for_sentence(s)
+                           for s in lemmatized]
+        expected_result = []
+
+        for sentence in lemmatized:
+            sent_result = np.zeros((10,), dtype=np.int16)
+            for word in sentence:
+                try:
+                    emo = self.emolex[word]
+                    sent_result = sent_result + emo[0]
+                except KeyError:
+                    pass
+            expected_result.append(sent_result)
+
+        return computed_result, expected_result
+
+    def assertListOfNdarrayEqual(self, l1, l2, msg=""):
+        """Same as assertEqual but for numpy arrays."""
+        if not isinstance(l1, list):
+            raise TypeError("First argument is not a list")
+
+        if not isinstance(l2, list):
+            raise TypeError("Second argument is not a list")
+
+        self.assertEqual(len(l1), len(l2), msg +
+                         " Lengths of lists are different.")
+
+        n = len(l1)
+        i = 0
+        while i < n:
+            self.assertEqual(l1[i].dtype, l2[i].dtype,
+                             "Different dtypes at position {}".format(i))
+            i = i + 1
+
+        i = 0
+        arr_equal = True
+        while i < n and arr_equal:
+            arr_equal = np.array_equal(l1[i], l2[i])
+            i = i + 1
+
+        if not arr_equal:
+            raise AssertionError(msg +
+                                 " Arrays at position {} differ".format(i - 1))
+
+    def checkInstance(self, o, etype):
+        if not isinstance(o, etype):
+            raise TypeError("Expected type {}, found {}"
+                            .format(str(etype), str(type(o))))
+
+    def assertSumOfNdarrayListsNotEqual(self, l1, l2):
+        """Assert that the sum of the two lists is different."""
+        self.checkInstance(l1, list)
+        self.checkInstance(l2, list)
+
+        self.checkInstance(l1[0], np.ndarray)
+        self.checkInstance(l2[0], np.ndarray)
+
+        result1 = np.zeros(l1[0].shape)
+        result2 = np.zeros(l2[0].shape)
+
+        for arr in l1:
+            result1 = result1 + arr
+
+        for arr in l2:
+            result2 = result2 + arr
+
+        if np.array_equal(result1, result2):
+            raise AssertionError("Results differ:\n{}\n{}"
+                                 .format(result1, result2))
