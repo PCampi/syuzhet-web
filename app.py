@@ -48,7 +48,12 @@ def analyze_text():
     req_contents = request.get_json()
 
     if req_contents:
-        text_to_analyze = req_contents['content']
+        try:
+            text_to_analyze = req_contents['content']
+        except KeyError:
+            response_dict = make_error_response("Malformed input JSON." +
+                                                " Missing 'content' field.")
+            return jsonify(response_dict)
 
         tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
                                 TAGDIR=cmgr.get_treetagger_path())
@@ -63,25 +68,35 @@ def analyze_text():
         result_dict = make_result_dict(analysis_result,
                                        emo_names=emotion_names)
         response_json = jsonify(result_dict)
-
         return response_json
     else:
         raise Exception("Empty input JSON")
 
 
-def make_result_dict(result, id=None, corpus=None, document=None,
-                     emo_names=None):
+def make_result_dict(data, request_id=None, corpus=None,
+                     document=None, emo_names=None):
     """Create a JSON with the results and all other fields."""
-    res = dict()
+    if data is None or data == []:
+        res = make_error_response("Empty analysis result.")
+        return res
 
-    keys = [('id', id), ('corpus', corpus), ('document', document),
-            ('emotion_names', emo_names), ('result', result)]
+    res = {}
 
-    for k in keys:
-        if k[1] is not None:
-            res[k[0]] = k[1]
+    keys = [('id', request_id), ('corpus', corpus), ('document', document),
+            ('emotion_names', emo_names), ('result', data)]
+
+    for key, val in keys:
+        if val is not None:
+            res[key] = val
 
     return res
+
+
+def make_error_response(msg="Couldn't satisfy request."):
+    """Return a dictionary for an error response.
+    Used to return an informative error message as JSON
+    for a failed request."""
+    return {'error': msg}
 
 
 if __name__ == "__main__":
