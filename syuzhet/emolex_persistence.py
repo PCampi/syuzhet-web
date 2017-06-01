@@ -8,6 +8,22 @@ it_path = "data/EmoLex_it.pickle"
 en_path = "data/EmoLex_en.pickle"
 
 
+def convert_csv_to_dict(csv_path):
+    """Convert a csv EmoLex Italian column to a dict representation."""
+    emolex_df = _load_emolex_in_dataframe(csv_path)
+    emolex_dict = italian_column_to_dict(emolex_df)
+
+    save_emolex(emolex_dict, it_path)
+
+
+def convert_csv_to_dict_english(csv_path):
+    """Convert a csv EmoLex English column to a dict representation."""
+    emolex_df = _load_emolex_in_dataframe(csv_path)
+    emolex_dict = english_column_to_dict(emolex_df)
+
+    save_emolex(emolex_dict, en_path)
+
+
 def _load_emolex_in_dataframe(emolex_path):
     """Load the EmoLex lexicon into a Pandas DataFrame.
 
@@ -30,9 +46,22 @@ def _load_emolex_in_dataframe(emolex_path):
     return emolex
 
 
-# TODO: test che salvi in modo corretto!!!
 def italian_column_to_dict(dataframe, column_name='Italian'):
-    """Collapse a dataframe into a dictionary."""
+    """Collapse a dataframe into a dictionary.
+
+    Parameters
+    ----------
+    dataframe: pandas.DataFrame
+        DataFrame containing the data, loaded from a csv
+
+    column_name: str
+        name of the column to use as primary key
+
+    Returns
+    -------
+    dict: Dict[str, List[np.ndarray]]
+        dictionary containing a list of numpy arrays of emotions
+        for every key."""
     result = dict()
 
     i = 0
