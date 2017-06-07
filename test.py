@@ -14,7 +14,6 @@ emotions_array_length = cmgr.get_emotion_array_length()
 data_dir = cmgr.get_data_dir()
 emolex_filename = cmgr.get_emolex_filename(language)
 
-pudb.set_trace()
 emolex_abs_path = get_absolute_path('syuzhet/'
                                     + data_dir + '/' + emolex_filename)
 
@@ -26,6 +25,7 @@ tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
 
 analyzer = syuzhet.Syuzhet(language, tagger, emotions_array_length, emolex)
 
-text = "Ciao, caro amico. Vorrei dirti qualcosa che crea gioia. Anche se ti sembra che sia spaventoso, non temere!"
+with open("test_data/Estratto mini.txt", 'r') as f:
+    text = f.read()
 
 result = analyzer.analyze_text(text)
