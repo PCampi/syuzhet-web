@@ -1,7 +1,9 @@
 """Main Syuzhet module."""
 from typing import List
 from functools import reduce
+from itertools import tee
 import numpy as np
+import pudb
 
 from .splitting import TextSplitter
 from .lemmatization import Lemmatizer
@@ -18,7 +20,7 @@ class Syuzhet():
         self.emolex = emolex
         self.splitter = TextSplitter(self.language)
 
-    def analyze_text(self, text: str):
+    def analyze_text(self, text: str, use_filter=True):
         """Extract emotions from a text.
 
         Parameters
@@ -32,20 +34,32 @@ class Syuzhet():
             the sum of all emotions found in the text
         """
         # get the sentences first
-        sentences = [self.splitter.sentence_to_words(s)
-                     for s in
-                     self.splitter.text_to_sentences(text)]
+        pudb.set_trace()
+        orig_sentences, to_lemmatize = tee(
+            self.splitter.sentence_to_words(s)
+            for s in
+            self.splitter.text_to_sentences(text))
 
         # get the lemmatized sentences
         lemmatizer = Lemmatizer(self.tagger)
-        lemmatized_sentences = [lemmatizer.lemmatize(s)
-                                for s in sentences]
+        lemmatized_sentences = (lemmatizer.lemmatize(s)
+                                for s in to_lemmatize)
+
+        # select the words: if the non lemmatized word is in EmoLex,
+        # leave it there, otherwise choose the lemmatized one
+        sents = [list(map((lambda x, y: x if x in self.emolex else y),
+                          s, lemmatized_s))
+                 for s, lemmatized_s
+                 in zip(orig_sentences, lemmatized_sentences)]
 
         # filter the lemmatized sentences: only words in EmoLex
         # with emotion count > 0
-        filtered_sentences = self.filter_sentences(lemmatized_sentences)
+        pudb.set_trace()
+        # TODO: can use an iterator here instead of a list
+        # for the variable sents
+        filtered_sentences = self.filter_sentences(sents)
 
-        sentence_emotions = [self.emotions_for_sentence(s)
+        sentence_emotions = [self.emotions_for_sentence(s, use_filter)
                              for s in filtered_sentences]
 
         aggregate_result = reduce((lambda x, y: x + y),
@@ -76,7 +90,7 @@ class Syuzhet():
         result = [[w for w in filter(filter_func, s)] for s in sentences]
         return result
 
-    def emotions_for_sentence(self, sentence):
+    def emotions_for_sentence(self, sentence, use_filter):
         """Get the emotions in a sentence.
         Parameters
         ----------
@@ -89,9 +103,39 @@ class Syuzhet():
             sum of the emotions of all the words in the sentence;
             may be zeros
         """
+        # if it's an empty sentence, return the default
+        if len(sentence) == 0:
+            return np.zeros(self.emotions_array_length, dtype=np.int16)
+        elif len(sentence) == 1:
+            emotions = self.emolex[sentence[0]]
+            if len(emotions) == 1:
+                return emotions
+            else:
+                all_and = reduce(np.logical_and, emotions).astype(np.int16)
+                if np.sum(all_and) > 0:
+                    return all_and
+                else:
+                    all_or = reduce(np.logical_or, emotions).astype(np.int16)
+                    return all_or
+
         # for every word in the sentence, get its emotional valence
+        from_emolex = (self.emolex[w] for w in sentence)
+        sums = [list(reduce(np.add, emo_values)) for emo_values in from_emolex]
+
+        # ora ho questa lista di np.ndarray, cosa ne faccio?
+        # se è attivo il filtraggio, procedo cercando i max
+        # se non è attivo, ritorno disambiguando e basta
+        # TODO: continuare da qui!!!
+        # creare nuova funzione per trovare le emozioni di picco
+        if use_filter:
+            # ecco...
+            pass
+        else:
+            pass
+
         result = np.zeros(self.emotions_array_length, dtype=np.int16)
 
+        # old but gold, keep it until the new one works
         for word in sentence:
             try:
                 emotions = self.emolex[word]
