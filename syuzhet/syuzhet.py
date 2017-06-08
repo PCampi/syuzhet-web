@@ -96,6 +96,7 @@ class Syuzhet():
         ----------
         sentence:
             a list of word tokens (str) representing the sentence
+			all words MUST be present in EmoLex
 
         Returns
         -------
@@ -103,7 +104,7 @@ class Syuzhet():
             sum of the emotions of all the words in the sentence;
             may be zeros
         """
-        # if it's an empty sentence, return the default
+        # if it's an empty sentence, return zeros
         if len(sentence) == 0:
             return np.zeros(self.emotions_array_length, dtype=np.int16)
         elif len(sentence) == 1:
@@ -124,11 +125,8 @@ class Syuzhet():
 
         # ora ho questa lista di np.ndarray, cosa ne faccio?
         # se è attivo il filtraggio, procedo cercando i max
-        # se non è attivo, ritorno disambiguando e basta
-        # TODO: continuare da qui!!!
-        # creare nuova funzione per trovare le emozioni di picco
+        # se non è attivo, ritorno disambiguando e basta		
         if use_filter:
-            # ecco...
             pass
         else:
             pass
@@ -145,6 +143,53 @@ class Syuzhet():
                 pass
 
         return result
+
+	def _choose_emotions(arr, reference_index: int) -> List[int]:
+		"""Choose the winning emotions in a sentence window.
+		
+		Parameters
+		----------
+		arr: List[np.ndarray]
+			a list of arrays representing the subsentence under consideration
+		
+		reference_index: int
+			the index of the word under consideration
+		
+		Returns
+		-------
+		result: List[int]
+			list of positions where the winning emotion(s) are located
+			in the emotion array of the reference word
+		"""
+		def find_multiple_max(arr):
+			"""Find all occurrences of the maximum value inside an array.
+			
+			Parameters
+			----------
+			arr: List of np.ndarray
+				sequence of which to find the max value
+			
+			Returns
+			-------
+			max_value, max_indexes: Tuple[int, List[int]]
+				max_value is the numeric value of the max,
+				max_indexes is a List of all the positions there it occurs
+			"""
+			max_value = arr[0]
+			max_indexes = [0]
+			for i in range(1, len(arr)):
+				current_value = arr[i]
+				if current_value == max_value:
+					max_indexes.append(i)
+				elif current_value > max_value:
+					max_value = current_value
+					max_indexes = [i]
+			
+			return max_value, max_indexes
+
+		total = reduce(np.add, arr)
+		max_val, max_ind = find_multiple_max(total)
+		# TODO: continua da qui!
 
     def _filter_func(self, word):
         """Function to filter out words with no emotional value."""
