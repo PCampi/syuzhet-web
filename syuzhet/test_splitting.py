@@ -1,7 +1,4 @@
-# coding: utf-8
-
 """Test for the TextSplitter class."""
-
 import unittest
 from .splitting import TextSplitter
 

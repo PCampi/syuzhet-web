@@ -4,7 +4,6 @@ from typing import List
 from functools import reduce
 from itertools import tee
 import numpy as np
-import pudb
 
 from .splitting import TextSplitter
 from .lemmatization import Lemmatizer

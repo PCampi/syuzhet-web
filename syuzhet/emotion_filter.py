@@ -1,7 +1,6 @@
 """Module for filtering emotions of a word based on the context."""
 from functools import reduce
 import numpy as np
-# import pudb
 
 
 def choose_emotions(arr, reference_index):
