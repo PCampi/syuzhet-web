@@ -32,5 +32,8 @@ analyzer2 = syuzhet.SyuzhetWithFilter(language, tagger,
 with open("test_data/Estratto mini.txt", 'r') as f:
     text = f.read()
 
+#with open("test_data/Testodiprova.txt", "r") as f:
+#    text = f.read()
+
 result = analyzer.analyze_text(text)
 result2 = analyzer2.analyze_text(text)

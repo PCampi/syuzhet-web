@@ -22,19 +22,7 @@ class SyuzhetWithFilter(SyuzhetABC):
             an array of emotions for the sentence.
         """
         n = len(sentence)
-
-        if n == 0:
-            return np.zeros(self.emotions_array_length,
-                            dtype=np.int16)
-
         from_emolex = [self.emolex[word] for word in sentence]
-
-        if n == 1:
-            result = choose_emotions(from_emolex, 0)
-            return result
-        if n == 2:
-            result = choose_emotions(from_emolex, 0) +\
-                     choose_emotions(from_emolex, 1)
 
         if n > 2:
             frst_part = choose_emotions(from_emolex[:3], 0)
@@ -46,4 +34,13 @@ class SyuzhetWithFilter(SyuzhetABC):
             central_part = reduce(np.add, seq)
 
             result = frst_part + last_part + central_part
-            return result
+        elif n == 0:
+            result = np.zeros(self.emotions_array_length,
+                              dtype=np.int16)
+        elif n == 1:
+            result = choose_emotions(from_emolex, 0)
+        elif n == 2:
+            result = choose_emotions(from_emolex, 0) +\
+                     choose_emotions(from_emolex, 1)
+
+        return result
