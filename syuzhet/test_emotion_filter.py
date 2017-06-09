@@ -4,7 +4,7 @@ import numpy as np
 from functools import reduce
 import pudb
 
-from .emotion_filter import __find_multiple_max as multiple_max
+from .emotion_filter import find_multiple_max as multiple_max
 from .emotion_filter import choose_emotions
 from .emotion_filter import __get_max_overlap as max_overlap
 

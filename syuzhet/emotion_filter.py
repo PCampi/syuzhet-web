@@ -1,7 +1,7 @@
 """Module for filtering emotions of a word based on the context."""
 from functools import reduce
 import numpy as np
-import pudb
+# import pudb
 
 
 def choose_emotions(arr, start, reference_index, keep_more=False):
@@ -33,7 +33,7 @@ def choose_emotions(arr, start, reference_index, keep_more=False):
         context_or = reduce(np.logical_or, context)
         result = __get_max_overlap(curr, context_or)
     else:
-        max_indexes = __find_multiple_max(curr)
+        max_indexes = find_multiple_max(curr)
         result = __array_with_indexes_and_shape(max_indexes, emo_shape)
 
     return result
@@ -68,7 +68,7 @@ def __get_max_overlap(current_sum, context_or):
 
         if np.sum(curr_and_context) > 0:
             # check that the max value of current is in common with context
-            max_indexes = __find_multiple_max(curr_sum)
+            max_indexes = find_multiple_max(curr_sum)
             general_max_indexes = general_max_indexes.union(set(max_indexes))
             max_to_keep = list(filter((lambda i: context_or[i] > 0),
                                       max_indexes))
@@ -82,13 +82,13 @@ def __get_max_overlap(current_sum, context_or):
                     if i not in general_max_indexes:
                         curr_sum[i] = current_sum[i]
         else:  # there is no overlap -> return the max value in current_sum
-            max_indexes = __find_multiple_max(current_sum)
+            max_indexes = find_multiple_max(current_sum)
             result = np.zeros(np.shape(current_sum), dtype=np.int16)
             for i in max_indexes:
                 result[i] = 1
 
     if result is None:
-        max_indexes = __find_multiple_max(current_sum)
+        max_indexes = find_multiple_max(current_sum)
         result = np.zeros(np.shape(current_sum), dtype=np.int16)
         for i in max_indexes:
             result[i] = 1
@@ -96,21 +96,20 @@ def __get_max_overlap(current_sum, context_or):
     return result
 
 
-def __find_multiple_max(arr, return_value=False):
+def find_multiple_max(arr, return_value=False):
     """Find all occurrences of the maximum value inside an array.
 
     Parameters
     ----------
-    arr: List of np.ndarray
-        sequence of which to find the max value
+    arr: np.ndarray
+        array of which to find the max value indexes
 
     Returns
     -------
     max_value, max_indexes: Tuple[int, List[int]]
         max_value is the numeric value of the max,
-        max_indexes is a List of all the positions there it occurs
+        max_indexes is a List of all the positions where it occurs
     """
-    # pudb.set_trace()
     max_value = arr[0]
     max_indexes = [0]
     for i in range(1, len(arr)):
