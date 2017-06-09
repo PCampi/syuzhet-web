@@ -23,9 +23,14 @@ with open(emolex_abs_path, 'rb') as f:
 tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
                         TAGDIR=cmgr.get_treetagger_path())
 
-analyzer = syuzhet.Syuzhet(language, tagger, emotions_array_length, emolex)
+analyzer = syuzhet.SyuzhetNoFilter(language, tagger,
+                                   emotions_array_length, emolex)
+
+analyzer2 = syuzhet.SyuzhetWithFilter(language, tagger,
+                                      emotions_array_length, emolex)
 
 with open("test_data/Estratto mini.txt", 'r') as f:
     text = f.read()
 
 result = analyzer.analyze_text(text)
+result2 = analyzer2.analyze_text(text)

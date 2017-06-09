@@ -4,7 +4,7 @@ import numpy as np
 # import pudb
 
 
-def choose_emotions(arr, start, reference_index, keep_more=False):
+def choose_emotions(arr, start, reference_index):
     """Choose the winning emotions in a sentence window.
 
     Parameters

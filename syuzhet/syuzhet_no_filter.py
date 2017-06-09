@@ -1,17 +1,11 @@
-"""Main Syuzhet module."""
-from typing import List
 from functools import reduce
-from itertools import tee
 import numpy as np
-import pudb
 
-from .splitting import TextSplitter
-from .lemmatization import Lemmatizer
-from .emotion_filter import find_multiple_max
+from .syuzhet_base import SyuzhetABC
 
 
-class SyuzhetNoFilter():
-    """Syuzhet text analyzer class."""
+class SyuzhetNoFilter(SyuzhetABC):
+    """Syuzhet text analyzer class, no filter version."""
 
     def emotions_for_sentence(self, sentence):
         """Get the emotions for a sentence.
@@ -26,5 +20,12 @@ class SyuzhetNoFilter():
         np.ndarray
             an array of emotions for the sentence.
         """
+        if len(sentence) == 0:
+            return np.zeros((self.emotions_array_length,),
+                            dtype=np.int16)
+
         from_emolex = (self.emolex[word] for word in sentence)
-        total = (reduce(np.logical_or, choices) for choices in from_emolex)
+        all_words = (reduce(np.logical_or, choices) for choices in from_emolex)
+        result = reduce(np.add, all_words)
+
+        return result

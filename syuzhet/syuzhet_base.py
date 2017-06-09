@@ -1,12 +1,10 @@
-# coding: utf-8
-
 """Main Syuzhet module."""
 from abc import ABC, abstractmethod
 from typing import List
 from functools import reduce
 from itertools import tee
 import numpy as np
-import pudb
+# import pudb
 
 from .splitting import TextSplitter
 from .lemmatization import Lemmatizer
@@ -55,9 +53,10 @@ class SyuzhetABC(ABC):
 
         # filter the lemmatized sentences: only words in EmoLex
         # with emotion count > 0
+        # pudb.set_trace()
         filtered_sentences = self.filter_sentences(sents)
 
-        sentence_emotions = [self.emotions_for_sentence(s, use_filter)
+        sentence_emotions = [self.emotions_for_sentence(s)
                              for s in filtered_sentences]
 
         aggregate_result = reduce((lambda x, y: x + y),
