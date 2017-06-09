@@ -25,7 +25,8 @@ class SyuzhetNoFilter(SyuzhetABC):
                             dtype=np.int16)
 
         from_emolex = (self.emolex[word] for word in sentence)
-        all_words = (reduce(np.logical_or, choices) for choices in from_emolex)
+        all_words = (reduce(np.logical_or, choices).astype(np.int16)
+                     for choices in from_emolex)
         result = reduce(np.add, all_words)
 
         return result
