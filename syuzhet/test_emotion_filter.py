@@ -2,7 +2,6 @@
 import unittest
 import numpy as np
 from functools import reduce
-import pudb
 
 from .emotion_filter import find_multiple_max as multiple_max
 from .emotion_filter import choose_emotions
@@ -55,7 +54,6 @@ class EmotionFilteringTest(unittest.TestCase):
         self.assertNdarrayEqual(computed, expected,
                                 " Arrays differ")
 
-        # pudb.set_trace()
         current_sum = np.array([0, 0, 4, 0, 0, 3, 0, 0, 1, 0],
                                dtype=np.int16)
         context_or = np.array([False, True, False, True, False,
