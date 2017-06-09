@@ -58,8 +58,8 @@ def analyze_text():
         tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
                                 TAGDIR=cmgr.get_treetagger_path())
 
-        analyzer = syuzhet.Syuzhet(language, tagger,
-                                   emotions_array_length, emolex)
+        analyzer = syuzhet.SyuzhetWithFilter(language, tagger,
+                                             emotions_array_length, emolex)
         analysis_result = analyzer.analyze_text(text_to_analyze)
 
         analyzer = None

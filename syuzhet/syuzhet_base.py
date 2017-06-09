@@ -4,7 +4,7 @@ from typing import List
 from functools import reduce
 from itertools import tee
 import numpy as np
-# import pudb
+import pudb
 
 from .splitting import TextSplitter
 from .lemmatization import Lemmatizer
@@ -53,7 +53,6 @@ class SyuzhetABC(ABC):
 
         # filter the lemmatized sentences: only words in EmoLex
         # with emotion count > 0
-        # pudb.set_trace()
         filtered_sentences = self.filter_sentences(sents)
 
         sentence_emotions = [self.emotions_for_sentence(s)
@@ -90,16 +89,6 @@ class SyuzhetABC(ABC):
     @abstractmethod
     def emotions_for_sentence(self, sentence):
         pass
-
-        # for word in sentence:
-        #     try:
-        #         emotions = self.emolex[word]
-        #         # FIXME: disambigua valenza
-        #         result = result + emotions[0]
-        #     except KeyError as e:
-        #         pass
-
-        # return result
 
     def _filter_func(self, word):
         """Function to filter out words with no emotional value."""
