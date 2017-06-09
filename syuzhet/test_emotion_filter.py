@@ -19,10 +19,7 @@ class EmotionFilteringTest(unittest.TestCase):
         c = [reduce(np.add, curr)]
         n = [reduce(np.add, nxtw)]
 
-        computed = choose_emotions([p, c, n],
-                                   1,
-                                   1,
-                                   False)
+        computed = choose_emotions([p, c, n], 1)
         expected = np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0], dtype=np.int16)
 
         self.assertNdarrayEqual(computed, expected, "Results differ")
@@ -34,10 +31,7 @@ class EmotionFilteringTest(unittest.TestCase):
         c = [reduce(np.add, curr)]
         n = [reduce(np.add, nxtw)]
 
-        computed = choose_emotions([p, c, n],
-                                   1,
-                                   1,
-                                   False)
+        computed = choose_emotions([p, c, n], 1)
         expected = np.array([0, 0, 0, 1, 0, 0, 1, 0, 0, 0], dtype=np.int16)
 
         self.assertNdarrayEqual(computed, expected, "Results differ")

@@ -30,17 +30,17 @@ class SyuzhetWithFilter(SyuzhetABC):
         from_emolex = [self.emolex[word] for word in sentence]
 
         if n == 1:
-            result = choose_emotions(from_emolex, 0, 0)
+            result = choose_emotions(from_emolex, 0)
             return result
         if n == 2:
-            result = choose_emotions(from_emolex, 0, 0) +\
-                     choose_emotions(from_emolex, 0, 1)
+            result = choose_emotions(from_emolex, 0) +\
+                     choose_emotions(from_emolex, 1)
 
         if n > 2:
-            frst_part = choose_emotions(from_emolex[:3], 0, 0)
-            last_part = choose_emotions(from_emolex[n-3:], 0, 2)
+            frst_part = choose_emotions(from_emolex[:3], 0)
+            last_part = choose_emotions(from_emolex[n-3:], 2)
 
-            seq = map((lambda i: choose_emotions(from_emolex[i-1:i+2], 0, 1)),
+            seq = map((lambda i: choose_emotions(from_emolex[i-1:i+2], 1)),
                       range(1, n-1))
 
             central_part = reduce(np.add, seq)

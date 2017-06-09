@@ -4,16 +4,13 @@ import numpy as np
 # import pudb
 
 
-def choose_emotions(arr, start, reference_index):
+def choose_emotions(arr, reference_index):
     """Choose the winning emotions in a sentence window.
 
     Parameters
     ----------
     arr: List[List[np.ndarray]]
         a list of arrays representing the subsentence under consideration
-
-    start: int
-        index at which the real emotions start
 
     reference_index: int
         the index of the word under consideration
