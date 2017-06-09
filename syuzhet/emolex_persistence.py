@@ -46,7 +46,8 @@ def _load_emolex_in_dataframe(emolex_path):
     return emolex
 
 
-def italian_column_to_dict(dataframe, column_name='Italian'):
+def italian_column_to_dict(dataframe, column_name='Italian',
+                           keep_sentiment=False):
     """Collapse a dataframe into a dictionary.
 
     Parameters
@@ -63,13 +64,14 @@ def italian_column_to_dict(dataframe, column_name='Italian'):
         dictionary containing a list of numpy arrays of emotions
         for every key."""
     result = dict()
+    start_index = 2 if keep_sentiment else 4
 
     i = 0
     dataframe_length = dataframe.shape[0]
 
     while i < dataframe_length:
         current_word = dataframe[column_name][i]
-        values = dataframe.iloc[i].values[2:].astype(np.int16)
+        values = dataframe.iloc[i].values[start_index:].astype(np.int16)
 
         word_emotions = [values]
 
@@ -79,7 +81,7 @@ def italian_column_to_dict(dataframe, column_name='Italian'):
                 dataframe.iloc[i + shift][column_name] == current_word):
 
             values_to_append = dataframe.iloc[i + shift]\
-                .values[2:].astype(np.int16)
+                .values[start_index:].astype(np.int16)
             word_emotions.append(values_to_append)
             shift = shift + 1
 
@@ -89,17 +91,18 @@ def italian_column_to_dict(dataframe, column_name='Italian'):
     return result
 
 
-# TODO: test che salvi in modo corretto!!!
-def english_column_to_dict(dataframe, column_name='English'):
+def english_column_to_dict(dataframe, column_name='English',
+                           keep_sentiment=False):
     """Collapse a dataframe into a dictionary."""
     result = dict()
+    start_index = 2 if keep_sentiment else 4
 
     i = 0
     dataframe_length = dataframe.shape[0]
 
     while i < dataframe_length:
         current_word = dataframe[column_name][i]
-        values = dataframe.iloc[i].values[2:].astype(np.int16)
+        values = dataframe.iloc[i].values[start_index:].astype(np.int16)
 
         word_emotions = [values]
 
@@ -109,7 +112,7 @@ def english_column_to_dict(dataframe, column_name='English'):
                 dataframe.iloc[i + shift][column_name] == current_word):
 
             values_to_append = dataframe.iloc[i + shift]\
-                .values[2:].astype(np.int16)
+                .values[start_index:].astype(np.int16)
             word_emotions.append(values_to_append)
             shift = shift + 1
 
