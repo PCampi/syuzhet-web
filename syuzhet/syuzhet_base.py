@@ -57,8 +57,12 @@ class SyuzhetABC(ABC):
         sentence_emotions = [self.emotions_for_sentence(s)
                              for s in filtered_sentences]
 
+        default_value = np.zeros(np.shape(sentence_emotions[0]),
+                                 dtype=np.int16)
+
         aggregate_result = reduce((lambda x, y: x + y),
-                                  sentence_emotions).tolist()
+                                  sentence_emotions,
+                                  default_value).tolist()
 
         return {'aggregate': aggregate_result,
                 'sentences': [arr.tolist() for arr in sentence_emotions]}
