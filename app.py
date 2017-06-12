@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
-from flask_cors import cross_origin
+from flask_cors import CORS
 import treetaggerwrapper as ttw
 import pickle
+# import pudb
 
 import syuzhet
 from path_problem_resolver import get_absolute_path
@@ -26,6 +27,7 @@ with open(emolex_abs_path, 'rb') as f:
 
 # Main application
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/', methods=['GET'])
@@ -35,14 +37,12 @@ def show_readme():
 
 
 @app.route('/gui-test', methods=['GET'])
-@cross_origin()
 def send_gui_test():
     """Sent the static index page."""
     return app.send_static_file('index.html')
 
 
 @app.route('/analyze', methods=['POST'])
-@cross_origin()
 def analyze_text():
     """Analyze a text and send response."""
     req_contents = request.get_json()
@@ -65,8 +65,12 @@ def analyze_text():
         analyzer = None
         tagger = None
 
-        result_dict = make_result_dict(analysis_result,
-                                       emo_names=emotion_names)
+        # pudb.set_trace()
+        result = {'aggregate': analysis_result['aggregate'].tolist(),
+                  'sentences': [arr.tolist()
+                                for arr in analysis_result['sentences']]}
+
+        result_dict = make_result_dict(result, emo_names=emotion_names)
         response_json = jsonify(result_dict)
         return response_json
     else:
