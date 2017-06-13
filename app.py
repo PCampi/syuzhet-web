@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import treetaggerwrapper as ttw
 import pickle
+import numpy as np
 # import pudb
 
 import syuzhet
@@ -67,8 +68,7 @@ def analyze_text():
 
         # pudb.set_trace()
         result = {'aggregate': analysis_result['aggregate'].tolist(),
-                  'sentences': [arr.tolist()
-                                for arr in analysis_result['sentences']]}
+                  'emotions': _make_sent_result(analysis_result['sentences'])}
 
         result_dict = make_result_dict(result, emo_names=emotion_names)
         response_json = jsonify(result_dict)
@@ -84,14 +84,10 @@ def make_result_dict(data, request_id=None, corpus=None,
         res = make_error_response("Empty analysis result.")
         return res
 
-    res = {}
-
-    keys = [('id', request_id), ('corpus', corpus), ('document', document),
+    tpls = [('id', request_id), ('corpus', corpus), ('document', document),
             ('emotion_names', emo_names), ('result', data)]
 
-    for key, val in keys:
-        if val is not None:
-            res[key] = val
+    res = {k: v for k, v in tpls if v is not None}
 
     return res
 
@@ -101,6 +97,30 @@ def make_error_response(msg="Couldn't satisfy request."):
     Used to return an informative error message as JSON
     for a failed request."""
     return {'error': msg}
+
+
+def _make_sent_result(sentences):
+    """Vertically stack the ndarrays and make them list.
+
+    Parameters
+    ----------
+    sentences: List[np.ndarray]
+        list of array, each representing the emotions in a sentence
+
+    Returns
+    -------
+    each_emo: dict[str: List[int]]
+        dictionary whose keys are the emotion names, and values the value
+        of the emotion for each sentence
+    """
+    if sentences is None or sentences == []:
+        return None
+
+    tmp = np.stack(sentences)
+    result = {emotion_names[i]: tmp[:, i].tolist()
+              for i in range(len(emotion_names))}
+
+    return result
 
 
 if __name__ == "__main__":
