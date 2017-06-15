@@ -3,109 +3,159 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Syuzhet web app</title>
-    <meta name="description" content="Web abb to extract emotions from narratives.">
+    <meta name="description" content="Web app to extract emotions from narratives.">
     <meta name="author" content="Pietro Campi">
     <meta name="format-detection" content="telephone=no">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
-    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+    <!-- jQuery -->
+    <script src="js/jquery-3.2.1.min.js"></script>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
-    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-    crossorigin="anonymous"></script>
+    <!-- Css Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
 
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-        google.charts.load('current', {packages: ['corechart']});
-        google.charts.setOnLoadCallback(function() {
-            console.log("Google Charts loaded");
-            $('#send_text_button').show();
-        });
-    </script>
+    <!-- For plotting: Chart.js -->
+    <script src="js/Chart.js"></script>
+    <!-- Functions from lodash -->
+    <script src="js/lodash.js"></script>
 </head>
 
-<body style="width: 100%; margin: 30px 10% 0 10%; background-color: #f5f5f5;">
-    <h1>Welcome to Syuzhet web interface.</h1>
+<body>
+<div class="container-fluid">
+<div class="row">
+<div class="col-md-6">
+    <h1>Analizza testo</h1>
 
-    <form style="margin: 0 auto; width: 100%;" id="myForm">
-        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="min-width: 80%">
-            <textarea class="mdl-textfield__input" type="text" rows="3" id="text_input"
-            name="content"></textarea>
-            <label class="mdl-textfield__label" for="text_input">Text to analyze...</label>
+    <form>
+        <div class="form-group">
+            <textarea class="form-control" rows="10" id="main-input"
+            placeholder="Testo da analizzare"></textarea>
         </div>
 
-        <div>
-            <input type="button"
-            class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
-            value="Send text" id="send_text_button"/>
+        <div class="form-group">
+            <input type="button" class="btn btn-default"
+            value="Analizza" id="send-text-button" />
         </div>
     </form>
 
-    <div class="emo-charts" id="barchart_material" style="height: 550px; width: 80%; margin-top: 30px; margin-bottom: 30px;">
+</div>
 
+<div class="col-md-6">
+    <canvas id="radar-plot"></canvas>
+</div>
+
+</div>
+    <div class="row line-plot-row-1">
+        <div class="col-md-6 line-plot-col1">
+            <canvas id="line-plot-1"></canvas>
+        </div>
+        <div class="col-md-6 line-plot-col2">
+            <canvas id="line-plot-2"></canvas>
+        </div>
     </div>
-</body>
+    <div class="row line-plot-row-2">
+        <div class="col-md-6 line-plot-col1">
+            <canvas id="line-plot-3"></canvas>
+        </div>
+        <div class="col-md-6 line-plot-col2">
+            <canvas id="line-plot-4"></canvas>
+        </div>
+    </div>
+</div>
+
+    <script src="js/custom/plots.js"></script>
 
     <script>
         $(document).ready(function() {
-            $('#send_text_button').hide();
-
-            $('#send_text_button').on('click', function () {
-                data_to_send = JSON.stringify({"content": String($("#text_input").val())})
-                console.log(data_to_send);
+            $('#send-text-button').on('click', function () {
+                dataToSend = JSON.stringify({"content": String($("#main-input").val())})
+                console.log(dataToSend);
 
                 $.ajax({
-                    url: 'https://syuzhet-web.herokuapp.com/analyze',
+                    // url: 'https://syuzhet-web.herokuapp.com/analyze',
+                    url: 'http://0.0.0.0:5100/analyze',
                     cache: false,
                     type: 'POST',
-                    data : data_to_send,
+                    data : dataToSend,
                     contentType: 'application/json; charset=utf-8',
                     dataType: 'json',
-                    success: function(json_response) {
+                    success: function(jsonResponse) {
                         console.log('Done!');
-                        console.log(json_response);
+                        console.log(jsonResponse);
 
-                        // create table data
-                        var data = new google.visualization.DataTable();
-                        var emotions = json_response["result"]["aggregate"];
-                        var emo_names = json_response["emotion_names"];
-                        var emo_colors = ['ff0000',
-                                        'ffa854',
-                                        'ff55ff',
-                                        '009600',
-                                        'ffff54',
-                                        '5151ff',
-                                        '59bdff',
-                                        '54ff54'];
+                        var aggregate = jsonResponse["result"]["aggregate"];
+                        var emoNames = jsonResponse["emotion_names"];
+                        var emoValues = jsonResponse["result"]["emotions"];
 
-                        var data_arr = [
-                            ['Emotion name', 'Intensity', {role: 'style'}]
-                        ];
+                        var ctxRadar = document.getElementById('radar-plot').getContext('2d');
+                        makeRadarPlot(ctxRadar, emoNames, aggregate);
 
-                        for (i = 2; i < emotions.length; i++) {
-                            new_data = [emo_names[i], emotions[i], emo_colors[i]];
-                            data_arr.push(new_data);
-                        }
+                        // Gioia e Tristezza
+                        var ctxLineGioiaTristezza = document.getElementById('line-plot-1').getContext('2d');
+                        var gioia = emoValues['Gioia'];
+                        var xLabels = _.range(gioia.length);
+                        var gioiaColor = {"r": 255, "g": 255, "b": 87, "a": 1};
+                        var gioiaTristezzaPlot = makeLinePlot(ctxLineGioiaTristezza, gioia, "Gioia", xLabels, gioiaColor);
 
-                        console.log(data_arr);
+                        var tristezzaColor = {"r": 140, "g": 140, "b": 255, "a": 1};
+                        gioiaTristezzaPlot.data.datasets.push({
+                            label: "Tristezza",
+                            data: emoValues['Tristezza'],
+                            borderColor: convertColorToString(tristezzaColor, false),
+                            backgroundColor: convertColorToString(tristezzaColor, true)
+                        });
+                        gioiaTristezzaPlot.update();
 
-                        var data = new google.visualization.arrayToDataTable(data_arr, false)
-                        // Set chart options
-                        var options = {
-                            chart: {
-                                title: 'Emotions in your text',
-                                subtitle: 'Computed by Syuzhet using EmoLex'
-                            },
-                            backgroundColor: '#f5f5f5',
-                            bars: 'horizontal' // Required for Material Bar Charts.
-                        };
+                        // Rabbia e Paura
+                        var ctxLineRabbiaPaura = document.getElementById('line-plot-2').getContext('2d');
+                        var rabbia = emoValues['Rabbia'];
+                        var xLabels = _.range(rabbia.length);
+                        var rabbiaColor = {"r": 255, "g": 0, "b": 0, "a": 1};
+                        var rabbiaPauraPlot = makeLinePlot(ctxLineRabbiaPaura, rabbia, "Rabbia", xLabels, rabbiaColor);
 
-                        var chart = new google.visualization.BarChart(document.getElementById('barchart_material'));
-                        chart.draw(data, options);
+                        var pauraColor = {"r": 0, "g": 150, "b": 0, "a": 1};
+                        rabbiaPauraPlot.data.datasets.push({
+                            label: "Paura",
+                            data: emoValues['Paura'],
+                            borderColor: convertColorToString(pauraColor, false),
+                            backgroundColor: convertColorToString(pauraColor, true)
+                        });
+                        rabbiaPauraPlot.update();
+
+                        // Sorpresa e Anticipazione
+                        var ctxLineSorpresaAnticipazione = document.getElementById('line-plot-3').getContext('2d');
+                        var sorpresa = emoValues['Sorpresa'];
+                        var xLabels = _.range(sorpresa.length);
+                        var sorpresaColor = {"r": 89, "g": 189, "b": 255, "a": 1};
+                        var sorpresaAnticipazionePlot = makeLinePlot(ctxLineSorpresaAnticipazione, sorpresa, "Sorpresa", xLabels, sorpresaColor);
+
+                        var anticipazioneColor = {"r": 255, "g": 168, "b": 84, "a": 1};
+                        sorpresaAnticipazionePlot.data.datasets.push({
+                            label: "Anticipazione",
+                            data: emoValues['Anticipazione'],
+                            borderColor: convertColorToString(anticipazioneColor, false),
+                            backgroundColor: convertColorToString(anticipazioneColor, true)
+                        });
+                        sorpresaAnticipazionePlot.update();
+
+                        // Fiducia e Disgusto
+                        var ctxLineFiduciaDisgusto = document.getElementById('line-plot-4').getContext('2d');
+                        var fiducia = emoValues['Fiducia'];
+                        var xLabels = _.range(fiducia.length);
+                        var fiduciaColor = {"r": 84, "g": 255, "b": 84, "a": 1};
+                        var fiduciaDisgustoPlot = makeLinePlot(ctxLineFiduciaDisgusto, fiducia, "Fiducia", xLabels, fiduciaColor);
+
+                        var disgustoColor = {"r": 255, "g": 83, "b": 255, "a": 1};
+                        fiduciaDisgustoPlot.data.datasets.push({
+                            label: "Disgusto",
+                            data: emoValues['Disgusto'],
+                            borderColor: convertColorToString(disgustoColor, false),
+                            backgroundColor: convertColorToString(disgustoColor, true)
+                        });
+                        fiduciaDisgustoPlot.update();
+
                     },
                     error: function(req, textStatus, errorThrown) {
                         console.log(req);
@@ -117,4 +167,6 @@
         });
     </script>
 
+    <script src="js/bootstrap.min.js"></script>
+</body>
 </html>
