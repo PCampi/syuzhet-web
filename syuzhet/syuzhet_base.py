@@ -57,15 +57,13 @@ class SyuzhetABC(ABC):
         sentence_emotions = [self.emotions_for_sentence(s)
                              for s in filtered_sentences]
 
-        default_value = np.zeros(np.shape(sentence_emotions[0]),
-                                 dtype=np.int16)
+        default_value = np.zeros(self.emotions_array_length, dtype=np.int16)
 
-        aggregate_result = reduce((lambda x, y: x + y),
-                                  sentence_emotions,
-                                  default_value).tolist()
+        aggregate_result = reduce(np.add, sentence_emotions, default_value)
 
-        return {'aggregate': aggregate_result,
-                'sentences': [arr.tolist() for arr in sentence_emotions]}
+        result = {'aggregate': aggregate_result,
+                  'sentences': sentence_emotions}
+        return result
 
     def filter_sentences(self, sentences: List[List[str]]) -> List[List[str]]:
         """Filter the sentences, leaving only the words with emotion > 0."""

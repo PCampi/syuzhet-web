@@ -1,7 +1,9 @@
-from flask import Flask, request, jsonify
-from flask_cors import cross_origin
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 import treetaggerwrapper as ttw
 import pickle
+import numpy as np
+# import pudb
 
 import syuzhet
 from path_problem_resolver import get_absolute_path
@@ -26,6 +28,7 @@ with open(emolex_abs_path, 'rb') as f:
 
 # Main application
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/', methods=['GET'])
@@ -35,14 +38,13 @@ def show_readme():
 
 
 @app.route('/gui-test', methods=['GET'])
-@cross_origin()
 def send_gui_test():
     """Sent the static index page."""
-    return app.send_static_file('index.html')
+    result = render_template("index.html")
+    return result
 
 
 @app.route('/analyze', methods=['POST'])
-@cross_origin()
 def analyze_text():
     """Analyze a text and send response."""
     req_contents = request.get_json()
@@ -65,8 +67,11 @@ def analyze_text():
         analyzer = None
         tagger = None
 
-        result_dict = make_result_dict(analysis_result,
-                                       emo_names=emotion_names)
+        # pudb.set_trace()
+        result = {'aggregate': analysis_result['aggregate'].tolist(),
+                  'emotions': _make_sent_result(analysis_result['sentences'])}
+
+        result_dict = make_result_dict(result, emo_names=emotion_names)
         response_json = jsonify(result_dict)
         return response_json
     else:
@@ -80,14 +85,10 @@ def make_result_dict(data, request_id=None, corpus=None,
         res = make_error_response("Empty analysis result.")
         return res
 
-    res = {}
-
-    keys = [('id', request_id), ('corpus', corpus), ('document', document),
+    tpls = [('id', request_id), ('corpus', corpus), ('document', document),
             ('emotion_names', emo_names), ('result', data)]
 
-    for key, val in keys:
-        if val is not None:
-            res[key] = val
+    res = {k: v for k, v in tpls if v is not None}
 
     return res
 
@@ -97,6 +98,30 @@ def make_error_response(msg="Couldn't satisfy request."):
     Used to return an informative error message as JSON
     for a failed request."""
     return {'error': msg}
+
+
+def _make_sent_result(sentences):
+    """Vertically stack the ndarrays and make them list.
+
+    Parameters
+    ----------
+    sentences: List[np.ndarray]
+        list of array, each representing the emotions in a sentence
+
+    Returns
+    -------
+    each_emo: dict[str: List[int]]
+        dictionary whose keys are the emotion names, and values the value
+        of the emotion for each sentence
+    """
+    if sentences is None or sentences == []:
+        return None
+
+    tmp = np.stack(sentences)
+    result = {emotion_names[i]: tmp[:, i].tolist()
+              for i in range(len(emotion_names))}
+
+    return result
 
 
 if __name__ == "__main__":
