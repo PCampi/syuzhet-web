@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Syuzhet web app</title>
+    <meta name="description" content="Web app to extract emotions from narratives.">
+    <meta name="author" content="Pietro Campi">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- jQuery -->
+    <script src="{{url_for('static', filename='js/lib/jquery.js')}}"></script>
+
+    <!-- Css Bootstrap -->
+    <link href="{{url_for('static', filename='css/lib/bootstrap.min.css')}}" rel="stylesheet" />
+    <script src="{{url_for('static', filename='js/lib/bootstrap.min.js')}}"></script>
+    <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet"/>
+
+    <!-- For plotting: Chart.js -->
+    <script src="{{url_for('static', filename='js/lib/Chart.js')}}"></script>
+    <!-- Functions from lodash -->
+    <script src="{{url_for('static', filename='js/lib/lodash.js')}}"></script>
+    <!-- Custom plotting -->
+    <script src="{{url_for('static', filename='js/plots.js')}}"></script>
+</head>
+
+<body>
+<div class="container-fluid">
+<div class="row">
+<div class="col-md-6">
+    <h1>Analizza testo</h1>
+
+    <form>
+        <div class="form-group">
+            <textarea class="form-control" rows="10" id="main-input"
+            placeholder="Testo da analizzare"></textarea>
+        </div>
+
+        <div class="form-group">
+            <input type="button" class="btn btn-default"
+            value="Analizza" id="send-text-button" />
+        </div>
+    </form>
+
+</div>
+
+<div class="col-md-6">
+    <canvas id="radar-plot"></canvas>
+</div>
+
+</div>
+    <div class="row line-plot-row-1">
+        <div class="col-md-6 line-plot-col1">
+            <canvas id="line-plot-1"></canvas>
+        </div>
+        <div class="col-md-6 line-plot-col2">
+            <canvas id="line-plot-2"></canvas>
+        </div>
+    </div>
+    <div class="row line-plot-row-2">
+        <div class="col-md-6 line-plot-col1">
+            <canvas id="line-plot-3"></canvas>
+        </div>
+        <div class="col-md-6 line-plot-col2">
+            <canvas id="line-plot-4"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#send-text-button').on('click', function () {
+            dataToSend = JSON.stringify({"content": String($("#main-input").val())})
+            console.log(dataToSend);
+
+            $.ajax({
+                url: 'https://syuzhet-web.herokuapp.com/analyze',
+                // url: 'http://0.0.0.0:5100/analyze',
+                cache: false,
+                type: 'POST',
+                data : dataToSend,
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function(jsonResponse) {
+                    console.log('Done!');
+                    console.log(jsonResponse);
+
+                    var aggregate = jsonResponse["result"]["aggregate"];
+                    var emoNames = jsonResponse["emotion_names"];
+                    var emoValues = jsonResponse["result"]["emotions"];
+
+                    var ctxRadar = document.getElementById('radar-plot').getContext('2d');
+                    makeRadarPlot(ctxRadar, emoNames, aggregate);
+
+                    // Gioia e Tristezza
+                    var ctxLineGioiaTristezza = document.getElementById('line-plot-1').getContext('2d');
+                    var gioia = emoValues['Gioia'];
+                    var xLabels = _.range(gioia.length);
+                    var gioiaColor = {"r": 255, "g": 255, "b": 87, "a": 1};
+                    var gioiaTristezzaPlot = makeLinePlot(ctxLineGioiaTristezza, gioia, "Gioia", xLabels, gioiaColor);
+
+                    var tristezzaColor = {"r": 140, "g": 140, "b": 255, "a": 1};
+                    gioiaTristezzaPlot.data.datasets.push({
+                        label: "Tristezza",
+                        data: emoValues['Tristezza'],
+                        borderColor: convertColorToString(tristezzaColor, false),
+                        backgroundColor: convertColorToString(tristezzaColor, true)
+                    });
+                    gioiaTristezzaPlot.update();
+
+                    // Rabbia e Paura
+                    var ctxLineRabbiaPaura = document.getElementById('line-plot-2').getContext('2d');
+                    var rabbia = emoValues['Rabbia'];
+                    var xLabels = _.range(rabbia.length);
+                    var rabbiaColor = {"r": 255, "g": 0, "b": 0, "a": 1};
+                    var rabbiaPauraPlot = makeLinePlot(ctxLineRabbiaPaura, rabbia, "Rabbia", xLabels, rabbiaColor);
+
+                    var pauraColor = {"r": 0, "g": 150, "b": 0, "a": 1};
+                    rabbiaPauraPlot.data.datasets.push({
+                        label: "Paura",
+                        data: emoValues['Paura'],
+                        borderColor: convertColorToString(pauraColor, false),
+                        backgroundColor: convertColorToString(pauraColor, true)
+                    });
+                    rabbiaPauraPlot.update();
+
+                    // Sorpresa e Anticipazione
+                    var ctxLineSorpresaAnticipazione = document.getElementById('line-plot-3').getContext('2d');
+                    var sorpresa = emoValues['Sorpresa'];
+                    var xLabels = _.range(sorpresa.length);
+                    var sorpresaColor = {"r": 89, "g": 189, "b": 255, "a": 1};
+                    var sorpresaAnticipazionePlot = makeLinePlot(ctxLineSorpresaAnticipazione, sorpresa, "Sorpresa", xLabels, sorpresaColor);
+
+                    var anticipazioneColor = {"r": 255, "g": 168, "b": 84, "a": 1};
+                    sorpresaAnticipazionePlot.data.datasets.push({
+                        label: "Anticipazione",
+                        data: emoValues['Anticipazione'],
+                        borderColor: convertColorToString(anticipazioneColor, false),
+                        backgroundColor: convertColorToString(anticipazioneColor, true)
+                    });
+                    sorpresaAnticipazionePlot.update();
+
+                    // Fiducia e Disgusto
+                    var ctxLineFiduciaDisgusto = document.getElementById('line-plot-4').getContext('2d');
+                    var fiducia = emoValues['Fiducia'];
+                    var xLabels = _.range(fiducia.length);
+                    var fiduciaColor = {"r": 84, "g": 255, "b": 84, "a": 1};
+                    var fiduciaDisgustoPlot = makeLinePlot(ctxLineFiduciaDisgusto, fiducia, "Fiducia", xLabels, fiduciaColor);
+
+                    var disgustoColor = {"r": 255, "g": 83, "b": 255, "a": 1};
+                    fiduciaDisgustoPlot.data.datasets.push({
+                        label: "Disgusto",
+                        data: emoValues['Disgusto'],
+                        borderColor: convertColorToString(disgustoColor, false),
+                        backgroundColor: convertColorToString(disgustoColor, true)
+                    });
+                    fiduciaDisgustoPlot.update();
+
+                },
+                error: function(req, textStatus, errorThrown) {
+                    console.log(req);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
