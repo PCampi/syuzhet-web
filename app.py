@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import treetaggerwrapper as ttw
 import pickle
@@ -40,7 +40,8 @@ def show_readme():
 @app.route('/gui-test', methods=['GET'])
 def send_gui_test():
     """Sent the static index page."""
-    return app.send_static_file('index.html')
+    result = render_template("index.html")
+    return result
 
 
 @app.route('/analyze', methods=['POST'])

@@ -64,6 +64,7 @@ function makeRadarPlot(context, emoNames, emoValues) {
                 }
             },
             scale: {
+                // display: false,
                 pointLabels: {
                     fontSize: 18
                 }
@@ -88,6 +89,16 @@ function makeLinePlot(context, dataToPlot, dataName, xLabels, color) {
                 borderColor: lineColor,
                 backgroundColor: fillColor
             }]
+        },
+        options: {
+            scales: {
+                xAxes:[{
+                    display: false
+                }],
+                yAxes:[{
+                    display: false
+                }]
+            }
         }
     });
 
