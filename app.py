@@ -116,14 +116,16 @@ def _make_sent_result(sentences):
     return result
 
 
-def _analyze(text, output_format='list'):
+def _analyze(text, output_format='list', also_get_sents=False):
     """Analyze a text using Syuzhet and TreeTagger."""
     tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
                             TAGDIR=cmgr.get_treetagger_path())
 
     analyzer = syuzhet.SyuzhetWithFilter(language, tagger,
                                          emotions_array_length, emolex)
-    analysis_result = analyzer.analyze_text(text)
+    analysis_result = analyzer.analyze_text(text,
+                                            get_sentences=also_get_sents)
+    # pudb.set_trace()
 
     analyzer = None
     tagger = None
@@ -138,6 +140,9 @@ def _analyze(text, output_format='list'):
     else:
         raise ValueError("Invalid argument output_format: {}"
                          .format(output_format))
+
+    if also_get_sents:
+        result['sentence_list'] = analysis_result['sentence_list']
 
     return result
 
