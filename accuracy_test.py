@@ -18,7 +18,7 @@ def go(sent, start=0):
     i = start
     cont = True
     while i < len(sent) and cont:
-        print("Frase {}".format(i))
+        print("\n\nFrase {}".format(i))
         print(" ".join(sent[i]) + "\n")
         user_choice = input("Continua: [y]/n -> ")
         if user_choice == 'y' or user_choice == "":
