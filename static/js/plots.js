@@ -40,15 +40,21 @@ function makeRadarPlot(context, emoNames, emoValues) {
         dataToPlot.push(value);
     }
 
+    // radarBorderColor = "rgba(0, 157, 255, 1.0)";
+    // radarBgColor = "rgba(0, 157, 255, 0.2)";
+
+    radarBorderColor = "rgba(162, 210, 255, 1.0)";
+    radarBgColor = "rgba(162, 210, 255, 0.4)";
+
     var myChart = new Chart(context, {
         type: 'radar',
         data: {
             labels: emoLabels,
             datasets: [{
                 label: "Intensità",
-                backgroundColor: "rgba(0, 157, 255, 0.2)",
-                borderColor: "rgba(0, 157, 255, 1.0)",
-                pointBackgroundColor: "rgba(0, 157, 255, 1.0)",
+                backgroundColor: radarBgColor,
+                borderColor: radarBorderColor,
+                pointBackgroundColor: radarBorderColor,
                 data: dataToPlot
             }]
         },

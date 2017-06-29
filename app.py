@@ -57,18 +57,10 @@ def analyze_text():
                                                 " Missing 'content' field.")
             return jsonify(response_dict)
 
-        tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
-                                TAGDIR=cmgr.get_treetagger_path())
-
-        analyzer = syuzhet.SyuzhetWithFilter(language, tagger,
-                                             emotions_array_length, emolex)
-        analysis_result = analyzer.analyze_text(text_to_analyze)
-
-        analyzer = None
-        tagger = None
+        analysis_result = _analyze(text_to_analyze, output_format='list')
 
         # pudb.set_trace()
-        result = {'aggregate': analysis_result['aggregate'].tolist(),
+        result = {'aggregate': analysis_result['aggregate'],
                   'emotions': _make_sent_result(analysis_result['sentences'])}
 
         result_dict = make_result_dict(result, emo_names=emotion_names)
@@ -120,6 +112,37 @@ def _make_sent_result(sentences):
     tmp = np.stack(sentences)
     result = {emotion_names[i]: tmp[:, i].tolist()
               for i in range(len(emotion_names))}
+
+    return result
+
+
+def _analyze(text, output_format='list', also_get_sents=False):
+    """Analyze a text using Syuzhet and TreeTagger."""
+    tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
+                            TAGDIR=cmgr.get_treetagger_path())
+
+    analyzer = syuzhet.SyuzhetWithFilter(language, tagger,
+                                         emotions_array_length, emolex)
+    analysis_result = analyzer.analyze_text(text,
+                                            get_sentences=also_get_sents)
+    # pudb.set_trace()
+
+    analyzer = None
+    tagger = None
+
+    if output_format == 'np.ndarray':
+        result = {'aggregate': analysis_result['aggregate'],
+                  'sentences': analysis_result['sentences']}
+    elif output_format == 'list':
+        result = {'aggregate': analysis_result['aggregate'].tolist(),
+                  'sentences': [x.tolist()
+                                for x in analysis_result['sentences']]}
+    else:
+        raise ValueError("Invalid argument output_format: {}"
+                         .format(output_format))
+
+    if also_get_sents:
+        result['sentence_list'] = analysis_result['sentence_list']
 
     return result
 

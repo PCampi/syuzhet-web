@@ -9,13 +9,13 @@
     <meta name="author" content="Pietro Campi">
     <meta name="format-detection" content="telephone=no">
 
-    <!-- jQuery -->
-    <script src="{{url_for('static', filename='js/lib/jquery.js')}}"></script>
-
     <!-- Css Bootstrap -->
     <link href="{{url_for('static', filename='css/lib/bootstrap.min.css')}}" rel="stylesheet" />
-    <script src="{{url_for('static', filename='js/lib/bootstrap.min.js')}}"></script>
     <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet"/>
+
+    <!-- jQuery -->
+    <script src="{{url_for('static', filename='js/lib/jquery.js')}}"></script>
+    <script src="{{url_for('static', filename='js/lib/bootstrap.min.js')}}"></script>
 
     <!-- For plotting: Chart.js -->
     <script src="{{url_for('static', filename='js/lib/Chart.js')}}"></script>
@@ -50,22 +50,30 @@
 </div>
 
 </div>
-    <div class="row line-plot-row-1">
-        <div class="col-md-6 line-plot-col1">
+    <div class="row line-plot-row">
+        <div class="col-md-8 col-centered">
             <canvas id="line-plot-1"></canvas>
         </div>
-        <div class="col-md-6 line-plot-col2">
+    </div>
+
+    <div class="row line-plot-row">
+        <div class="col-md-8 col-centered">
             <canvas id="line-plot-2"></canvas>
         </div>
     </div>
-    <div class="row line-plot-row-2">
-        <div class="col-md-6 line-plot-col1">
+
+    <div class="row line-plot-row">
+        <div class="col-md-8 col-centered">
             <canvas id="line-plot-3"></canvas>
         </div>
-        <div class="col-md-6 line-plot-col2">
+    </div>
+
+    <div class="row line-plot-row">
+        <div class="col-md-8 col-centered">
             <canvas id="line-plot-4"></canvas>
         </div>
     </div>
+
 </div>
 
 <script>
@@ -97,10 +105,12 @@
                     var ctxLineGioiaTristezza = document.getElementById('line-plot-1').getContext('2d');
                     var gioia = emoValues['Gioia'];
                     var xLabels = _.range(gioia.length);
-                    var gioiaColor = {"r": 255, "g": 255, "b": 87, "a": 1};
+                    // var gioiaColor = {"r": 255, "g": 255, "b": 87, "a": 1};
+                    var gioiaColor = {"r": 255, "g": 255, "b": 131, "a": 1};
                     var gioiaTristezzaPlot = makeLinePlot(ctxLineGioiaTristezza, gioia, "Gioia", xLabels, gioiaColor);
 
-                    var tristezzaColor = {"r": 140, "g": 140, "b": 255, "a": 1};
+                    // var tristezzaColor = {"r": 140, "g": 140, "b": 255, "a": 1};
+                    var tristezzaColor = {"r": 160, "g": 194, "b": 242, "a": 1};
                     gioiaTristezzaPlot.data.datasets.push({
                         label: "Tristezza",
                         data: emoValues['Tristezza'],
@@ -113,10 +123,12 @@
                     var ctxLineRabbiaPaura = document.getElementById('line-plot-2').getContext('2d');
                     var rabbia = emoValues['Rabbia'];
                     var xLabels = _.range(rabbia.length);
-                    var rabbiaColor = {"r": 255, "g": 0, "b": 0, "a": 1};
+                    // var rabbiaColor = {"r": 255, "g": 0, "b": 0, "a": 1};
+                    var rabbiaColor = {"r": 255, "g": 180, "b": 180, "a": 1};
                     var rabbiaPauraPlot = makeLinePlot(ctxLineRabbiaPaura, rabbia, "Rabbia", xLabels, rabbiaColor);
 
-                    var pauraColor = {"r": 0, "g": 150, "b": 0, "a": 1};
+                    // var pauraColor = {"r": 0, "g": 150, "b": 0, "a": 1};
+                    var pauraColor = {"r": 75, "g": 174, "b": 136, "a": 1};
                     rabbiaPauraPlot.data.datasets.push({
                         label: "Paura",
                         data: emoValues['Paura'],
@@ -129,10 +141,12 @@
                     var ctxLineSorpresaAnticipazione = document.getElementById('line-plot-3').getContext('2d');
                     var sorpresa = emoValues['Sorpresa'];
                     var xLabels = _.range(sorpresa.length);
-                    var sorpresaColor = {"r": 89, "g": 189, "b": 255, "a": 1};
+                    // var sorpresaColor = {"r": 89, "g": 189, "b": 255, "a": 1};
+                    var sorpresaColor = {"r": 190, "g": 230, "b": 255, "a": 1};
                     var sorpresaAnticipazionePlot = makeLinePlot(ctxLineSorpresaAnticipazione, sorpresa, "Sorpresa", xLabels, sorpresaColor);
 
-                    var anticipazioneColor = {"r": 255, "g": 168, "b": 84, "a": 1};
+                    // var anticipazioneColor = {"r": 255, "g": 168, "b": 84, "a": 1};
+                    var anticipazioneColor = {"r": 255, "g": 211, "b": 167, "a": 1};
                     sorpresaAnticipazionePlot.data.datasets.push({
                         label: "Anticipazione",
                         data: emoValues['Anticipazione'],
@@ -145,10 +159,12 @@
                     var ctxLineFiduciaDisgusto = document.getElementById('line-plot-4').getContext('2d');
                     var fiducia = emoValues['Fiducia'];
                     var xLabels = _.range(fiducia.length);
-                    var fiduciaColor = {"r": 84, "g": 255, "b": 84, "a": 1};
+                    // var fiduciaColor = {"r": 84, "g": 255, "b": 84, "a": 1};
+                    var fiduciaColor = {"r": 149, "g": 229, "b": 151, "a": 1};
                     var fiduciaDisgustoPlot = makeLinePlot(ctxLineFiduciaDisgusto, fiducia, "Fiducia", xLabels, fiduciaColor);
 
-                    var disgustoColor = {"r": 255, "g": 83, "b": 255, "a": 1};
+                    // var disgustoColor = {"r": 255, "g": 83, "b": 255, "a": 1};
+                    var disgustoColor = {"r": 228, "g": 161, "b": 255, "a": 1};
                     fiduciaDisgustoPlot.data.datasets.push({
                         label: "Disgusto",
                         data: emoValues['Disgusto'],

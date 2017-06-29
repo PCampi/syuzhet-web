@@ -20,7 +20,7 @@ class SyuzhetABC(ABC):
         self.emolex = emolex
         self.splitter = TextSplitter(self.language)
 
-    def analyze_text(self, text, use_filter=True):
+    def analyze_text(self, text, get_sentences=False):
         """Extract emotions from a text.
 
         Parameters
@@ -63,6 +63,12 @@ class SyuzhetABC(ABC):
 
         result = {'aggregate': aggregate_result,
                   'sentences': sentence_emotions}
+
+        if get_sentences:
+            result['sentence_list'] = [self.splitter.sentence_to_words(s)
+                                       for s in
+                                       self.splitter.text_to_sentences(text)]
+
         return result
 
     def filter_sentences(self, sentences: List[List[str]]) -> List[List[str]]:
