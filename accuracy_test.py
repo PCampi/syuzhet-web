@@ -64,6 +64,13 @@ def go(sent, start=0):
             cont = False
 
 
+def go_to_sentence(sentences, index):
+    if index >= 0 and index < len(sentences):
+        print(" ".join(sentences[index]))
+    else:
+        raise ValueError("Index out of bounds: {}".format(index))
+
+
 def compare_series(human, auto):
     """Compare the human annotated series with syuzhet's one.
 
