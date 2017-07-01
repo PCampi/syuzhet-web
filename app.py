@@ -57,11 +57,23 @@ def analyze_text():
                                                 " Missing 'content' field.")
             return jsonify(response_dict)
 
-        analysis_result = _analyze(text_to_analyze, output_format='list')
+        try:
+            get_sents = req_contents['get_sentences']
+            get_sentences = get_sents
+        except KeyError:
+            get_sentences = False
+
+        analysis_result = _analyze(text_to_analyze,
+                                   output_format='list',
+                                   sent_strs=get_sentences)
 
         # pudb.set_trace()
         result = {'aggregate': analysis_result['aggregate'],
                   'emotions': _make_sent_result(analysis_result['sentences'])}
+
+        if get_sentences:
+            result['splitted_sentences'] =\
+                analysis_result['splitted_sentences']
 
         result_dict = make_result_dict(result, emo_names=emotion_names)
         response_json = jsonify(result_dict)
@@ -92,12 +104,12 @@ def make_error_response(msg="Couldn't satisfy request."):
     return {'error': msg}
 
 
-def _make_sent_result(sentences):
+def _make_sent_result(emotions):
     """Vertically stack the ndarrays and make them list.
 
     Parameters
     ----------
-    sentences: List[np.ndarray]
+    emotions: List[np.ndarray]
         list of array, each representing the emotions in a sentence
 
     Returns
@@ -106,17 +118,18 @@ def _make_sent_result(sentences):
         dictionary whose keys are the emotion names, and values the value
         of the emotion for each sentence
     """
-    if sentences is None or sentences == []:
+    if emotions is None or emotions == []:
         return None
 
-    tmp = np.stack(sentences)
+    tmp = np.stack(emotions)
     result = {emotion_names[i]: tmp[:, i].tolist()
               for i in range(len(emotion_names))}
 
     return result
 
 
-def _analyze(text, output_format='list', also_get_sents=False):
+def _analyze(text, output_format='list', sent_list=False,
+             sent_strs=False):
     """Analyze a text using Syuzhet and TreeTagger."""
     tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
                             TAGDIR=cmgr.get_treetagger_path())
@@ -124,7 +137,8 @@ def _analyze(text, output_format='list', also_get_sents=False):
     analyzer = syuzhet.SyuzhetWithFilter(language, tagger,
                                          emotions_array_length, emolex)
     analysis_result = analyzer.analyze_text(text,
-                                            get_sentences=also_get_sents)
+                                            get_sentences=sent_list,
+                                            return_sentence_str=sent_strs)
     # pudb.set_trace()
 
     analyzer = None
@@ -141,8 +155,11 @@ def _analyze(text, output_format='list', also_get_sents=False):
         raise ValueError("Invalid argument output_format: {}"
                          .format(output_format))
 
-    if also_get_sents:
+    if sent_list:
         result['sentence_list'] = analysis_result['sentence_list']
+
+    if sent_strs:
+        result['splitted_sentences'] = analysis_result['sentences_as_str']
 
     return result
 

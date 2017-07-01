@@ -7,6 +7,8 @@ import numpy as np
 
 from .splitting import TextSplitter
 from .lemmatization import Lemmatizer
+from .preprocessing import preprocess_for_analysis
+from .preprocessing import preprocess_for_sentence_splitting
 
 
 class SyuzhetABC(ABC):
@@ -20,7 +22,8 @@ class SyuzhetABC(ABC):
         self.emolex = emolex
         self.splitter = TextSplitter(self.language)
 
-    def analyze_text(self, text, get_sentences=False):
+    def analyze_text(self, text, get_sentences=False,
+                     return_sentence_str=False):
         """Extract emotions from a text.
 
         Parameters
@@ -33,10 +36,17 @@ class SyuzhetABC(ABC):
         numpy.array:
             the sum of all emotions found in the text
         """
-        orig_sentences, to_lemmatize = tee(
-            self.splitter.sentence_to_words(s)
-            for s in
-            self.splitter.text_to_sentences(text))
+        preprocessed_text = preprocess_for_analysis(text)
+        sentences_str = self.splitter.text_to_sentences(preprocessed_text)
+
+        if get_sentences:
+            orig_sentences, to_lemmatize, sent_to_return = tee(
+                (self.splitter.sentence_to_words(s)
+                 for s in sentences_str), 3)
+        else:
+            orig_sentences, to_lemmatize = tee(
+                self.splitter.sentence_to_words(s)
+                for s in sentences_str)
 
         # get the lemmatized sentences
         lemmatizer = Lemmatizer(self.tagger)
@@ -65,9 +75,12 @@ class SyuzhetABC(ABC):
                   'sentences': sentence_emotions}
 
         if get_sentences:
-            result['sentence_list'] = [self.splitter.sentence_to_words(s)
-                                       for s in
-                                       self.splitter.text_to_sentences(text)]
+            result['sentence_list'] = list(map(list, sent_to_return))
+
+        if return_sentence_str:
+            sents_to_return = self.splitter.text_to_sentences(
+                            preprocess_for_sentence_splitting(text))
+            result['sentences_as_str'] = sents_to_return
 
         return result
 

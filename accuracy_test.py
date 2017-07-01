@@ -46,7 +46,7 @@ def analyze_file(file_path=test_file):
     with open(file_path, 'r') as f:
         text = f.read()
 
-    result = app._analyze(text, also_get_sents=True)
+    result = app._analyze(text, sent_list=True)
 
     return result
 
