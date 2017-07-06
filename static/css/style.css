@@ -5,14 +5,29 @@ body {
 }
 
 .line-plot-row {
-    height: 60vh;
-}
-
-.height-400 {
-    height: 400px;
+    position: relative;
+    width: 100%;
 }
 
 .col-centered {
     float: none;
     margin: 0 auto;
+}
+
+.radar-container {
+    position: relative;
+}
+
+@media screen and (min-width: 1024px) {
+    .line-plot-row {
+        padding-top: 7vh; /* Ensure no overlap */
+    }
+
+    .radar-container {
+        width: 500px;
+        min-width: 500px;
+        max-width: 500px;
+        float: none;
+        margin: 60px auto 0px auto;
+    }
 }

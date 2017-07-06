@@ -85,18 +85,30 @@ function makeLinePlot(context, dataToPlot, dataName, xLabels, color) {
     var lineColor = convertColorToString(color, false);
     var fillColor = convertColorToString(color, true);
 
+    var myData = {
+        labels: xLabels,
+        datasets: [{
+            label: dataName,
+            data: dataToPlot,
+            borderColor: lineColor,
+            backgroundColor: fillColor
+        }]
+    }
+
+    if (xLabels.length > 30) {
+        myData['datasets'][0]['pointRadius'] = 0
+        myData['datasets'][0]['pointHitRadius'] = 5
+    }
+
     var myChart = new Chart(context, {
         type: 'line',
-        data: {
-            labels: xLabels,
-            datasets: [{
-                label: dataName,
-                data: dataToPlot,
-                borderColor: lineColor,
-                backgroundColor: fillColor
-            }]
-        },
+        data: myData,
         options: {
+            onresize: function(instance, newSize) {
+                console.log(instance);
+                console.log(newSize);
+            },
+            maintainaspectratio: true,
             scales: {
                 xAxes:[{
                     display: false
@@ -109,4 +121,14 @@ function makeLinePlot(context, dataToPlot, dataName, xLabels, color) {
     });
 
     return myChart;
+}
+
+function addNewDatasetToPlot(plot, newDataset) {
+    if (newDataset['data'].length > 20) {
+        newDataset['pointRadius'] = 0
+        newDataset['pointHitRadius'] = 5
+    }
+
+    plot.data.datasets.push(newDataset)
+    plot.update()
 }

@@ -28,51 +28,53 @@
 <body>
 <div class="container-fluid">
 <div class="row">
-<div class="col-md-6">
-    <h1>Analizza testo</h1>
+    <div class="col-md-6">
+        <h1>Analizza testo</h1>
 
-    <form>
-        <div class="form-group">
-            <textarea class="form-control" rows="10" id="main-input"
-            placeholder="Testo da analizzare"></textarea>
+        <form>
+            <div class="form-group">
+                <textarea class="form-control my-textarea" rows="25" id="main-input"
+                placeholder="Testo da analizzare"></textarea>
+            </div>
+
+            <div class="form-group">
+                <input type="button" class="btn btn-default"
+                value="Analizza" id="send-text-button" />
+            </div>
+        </form>
+
+    </div>
+
+    <div class="col-md-6">
+        <div class="radar-container">
+            <canvas id="radar-plot"></canvas>
         </div>
-
-        <div class="form-group">
-            <input type="button" class="btn btn-default"
-            value="Analizza" id="send-text-button" />
-        </div>
-    </form>
-
+    </div>
 </div>
 
-<div class="col-md-6">
-    <canvas id="radar-plot"></canvas>
+<div class="row line-plot-row">
+    <div class="col-md-8 col-centered">
+        <canvas id="line-plot-1"></canvas>
+    </div>
 </div>
 
+<div class="row line-plot-row">
+    <div class="col-md-8 col-centered">
+        <canvas id="line-plot-2"></canvas>
+    </div>
 </div>
-    <div class="row line-plot-row">
-        <div class="col-md-8 col-centered">
-            <canvas id="line-plot-1"></canvas>
-        </div>
-    </div>
 
-    <div class="row line-plot-row">
-        <div class="col-md-8 col-centered">
-            <canvas id="line-plot-2"></canvas>
-        </div>
+<div class="row line-plot-row">
+    <div class="col-md-8 col-centered">
+        <canvas id="line-plot-3"></canvas>
     </div>
+</div>
 
-    <div class="row line-plot-row">
-        <div class="col-md-8 col-centered">
-            <canvas id="line-plot-3"></canvas>
-        </div>
+<div class="row line-plot-row">
+    <div class="col-md-8 col-centered">
+        <canvas id="line-plot-4"></canvas>
     </div>
-
-    <div class="row line-plot-row">
-        <div class="col-md-8 col-centered">
-            <canvas id="line-plot-4"></canvas>
-        </div>
-    </div>
+</div>
 
 </div>
 
@@ -105,74 +107,61 @@
                     var ctxLineGioiaTristezza = document.getElementById('line-plot-1').getContext('2d');
                     var gioia = emoValues['Gioia'];
                     var xLabels = _.range(gioia.length);
-                    // var gioiaColor = {"r": 255, "g": 255, "b": 87, "a": 1};
                     var gioiaColor = {"r": 255, "g": 255, "b": 131, "a": 1};
                     var gioiaTristezzaPlot = makeLinePlot(ctxLineGioiaTristezza, gioia, "Gioia", xLabels, gioiaColor);
 
-                    // var tristezzaColor = {"r": 140, "g": 140, "b": 255, "a": 1};
                     var tristezzaColor = {"r": 160, "g": 194, "b": 242, "a": 1};
-                    gioiaTristezzaPlot.data.datasets.push({
+                    addNewDatasetToPlot(gioiaTristezzaPlot, {
                         label: "Tristezza",
                         data: emoValues['Tristezza'],
                         borderColor: convertColorToString(tristezzaColor, false),
                         backgroundColor: convertColorToString(tristezzaColor, true)
                     });
-                    gioiaTristezzaPlot.update();
 
                     // Rabbia e Paura
                     var ctxLineRabbiaPaura = document.getElementById('line-plot-2').getContext('2d');
                     var rabbia = emoValues['Rabbia'];
                     var xLabels = _.range(rabbia.length);
-                    // var rabbiaColor = {"r": 255, "g": 0, "b": 0, "a": 1};
                     var rabbiaColor = {"r": 255, "g": 180, "b": 180, "a": 1};
                     var rabbiaPauraPlot = makeLinePlot(ctxLineRabbiaPaura, rabbia, "Rabbia", xLabels, rabbiaColor);
 
-                    // var pauraColor = {"r": 0, "g": 150, "b": 0, "a": 1};
                     var pauraColor = {"r": 75, "g": 174, "b": 136, "a": 1};
-                    rabbiaPauraPlot.data.datasets.push({
+                    addNewDatasetToPlot(rabbiaPauraPlot, {
                         label: "Paura",
                         data: emoValues['Paura'],
                         borderColor: convertColorToString(pauraColor, false),
                         backgroundColor: convertColorToString(pauraColor, true)
                     });
-                    rabbiaPauraPlot.update();
 
                     // Sorpresa e Anticipazione
                     var ctxLineSorpresaAnticipazione = document.getElementById('line-plot-3').getContext('2d');
                     var sorpresa = emoValues['Sorpresa'];
                     var xLabels = _.range(sorpresa.length);
-                    // var sorpresaColor = {"r": 89, "g": 189, "b": 255, "a": 1};
                     var sorpresaColor = {"r": 190, "g": 230, "b": 255, "a": 1};
                     var sorpresaAnticipazionePlot = makeLinePlot(ctxLineSorpresaAnticipazione, sorpresa, "Sorpresa", xLabels, sorpresaColor);
 
-                    // var anticipazioneColor = {"r": 255, "g": 168, "b": 84, "a": 1};
                     var anticipazioneColor = {"r": 255, "g": 211, "b": 167, "a": 1};
-                    sorpresaAnticipazionePlot.data.datasets.push({
+                    addNewDatasetToPlot(sorpresaAnticipazionePlot, {
                         label: "Anticipazione",
                         data: emoValues['Anticipazione'],
                         borderColor: convertColorToString(anticipazioneColor, false),
                         backgroundColor: convertColorToString(anticipazioneColor, true)
                     });
-                    sorpresaAnticipazionePlot.update();
 
                     // Fiducia e Disgusto
                     var ctxLineFiduciaDisgusto = document.getElementById('line-plot-4').getContext('2d');
                     var fiducia = emoValues['Fiducia'];
                     var xLabels = _.range(fiducia.length);
-                    // var fiduciaColor = {"r": 84, "g": 255, "b": 84, "a": 1};
                     var fiduciaColor = {"r": 149, "g": 229, "b": 151, "a": 1};
                     var fiduciaDisgustoPlot = makeLinePlot(ctxLineFiduciaDisgusto, fiducia, "Fiducia", xLabels, fiduciaColor);
 
-                    // var disgustoColor = {"r": 255, "g": 83, "b": 255, "a": 1};
                     var disgustoColor = {"r": 228, "g": 161, "b": 255, "a": 1};
-                    fiduciaDisgustoPlot.data.datasets.push({
+                    addNewDatasetToPlot(fiduciaDisgustoPlot, {
                         label: "Disgusto",
                         data: emoValues['Disgusto'],
                         borderColor: convertColorToString(disgustoColor, false),
                         backgroundColor: convertColorToString(disgustoColor, true)
                     });
-                    fiduciaDisgustoPlot.update();
-
                 },
                 error: function(req, textStatus, errorThrown) {
                     console.log(req);
