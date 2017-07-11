@@ -17,14 +17,20 @@ emotions_array_length = cmgr.get_emotion_array_length()
 emotion_names = cmgr.get_emotion_names()
 
 data_dir = cmgr.get_data_dir()
-emolex_filename = cmgr.get_emolex_filename(language)
+emolex_filename = cmgr.get_lexicon_filename(language)
 
 emolex_abs_path = get_absolute_path('syuzhet/'
                                     + data_dir + '/' + emolex_filename)
 
+emolex_enh_filename = cmgr.get_enhanced_lexicon_filename()
+emolex_enh_path = get_absolute_path('syuzhet/' + data_dir +
+                                    '/' + emolex_enh_filename)
+
 with open(emolex_abs_path, 'rb') as f:
     emolex = pickle.load(f)
 
+with open(emolex_enh_path, 'rb') as f:
+    emolex_enhanced = pickle.load(f)
 
 # Main application
 app = Flask(__name__)
@@ -63,9 +69,15 @@ def analyze_text():
         except KeyError:
             get_sentences = False
 
+        try:
+            lex_version = req_contents['lexicon_version']
+        except KeyError:
+            lex_version = 'base'
+
         analysis_result = _analyze(text_to_analyze,
                                    output_format='list',
-                                   sent_strs=get_sentences)
+                                   sent_strs=get_sentences,
+                                   lex_version=lex_version)
 
         # pudb.set_trace()
         result = {'aggregate': analysis_result['aggregate'],
@@ -129,13 +141,18 @@ def _make_sent_result(emotions):
 
 
 def _analyze(text, output_format='list', sent_list=False,
-             sent_strs=False):
+             sent_strs=False, lex_version='base'):
     """Analyze a text using Syuzhet and TreeTagger."""
     tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
                             TAGDIR=cmgr.get_treetagger_path())
 
+    if lex_version == 'base':
+        lex = emolex
+    elif lex_version == 'enhanced':
+        lex = emolex_enhanced
+
     analyzer = syuzhet.SyuzhetWithFilter(language, tagger,
-                                         emotions_array_length, emolex)
+                                         emotions_array_length, lex)
     analysis_result = analyzer.analyze_text(text,
                                             get_sentences=sent_list,
                                             return_sentence_str=sent_strs)
