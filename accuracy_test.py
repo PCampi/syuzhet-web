@@ -41,12 +41,17 @@ def load_human(filepath="./accuracy_data/Ragazzo da parete - taggato.csv"):
     return df.values[:, 1:].tolist()
 
 
-def analyze_file(file_path=test_file):
+def analyze_file(lex_version, file_path=test_file):
     """Analyze the text in the file and get results."""
+    if lex_version != 'base' and lex_version != 'enhanced':
+        raise Exception("Unknown lexicon version: accepted values are " +
+                        "``base`` and ``enhanced``")
+
     with open(file_path, 'r') as f:
         text = f.read()
 
-    result = app._analyze(text, sent_list=True)
+    result = app._analyze(text, sent_list=True, sent_strs=True,
+                          lex_version=lex_version)
 
     return result
 
@@ -56,7 +61,7 @@ def go(sent, start=0):
     cont = True
     while i < len(sent) and cont:
         print("\n\nFrase {}".format(i))
-        print(" ".join(sent[i]) + "\n")
+        print(sent[i] + "\n")
         user_choice = input("Continua: [y]/n -> ")
         if user_choice == 'y' or user_choice == "":
             i = i + 1

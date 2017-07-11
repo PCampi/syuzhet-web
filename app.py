@@ -70,6 +70,16 @@ def analyze_text():
             get_sentences = False
 
         try:
+            preprocess = req_contents['preprocess_text']
+        except KeyError:
+            preprocess = False
+
+        try:
+            use_filter = req_contents['use_filter']
+        except KeyError:
+            use_filter = False
+
+        try:
             lex_version = req_contents['lexicon_version']
         except KeyError:
             lex_version = 'base'
@@ -77,7 +87,9 @@ def analyze_text():
         analysis_result = _analyze(text_to_analyze,
                                    output_format='list',
                                    sent_strs=get_sentences,
-                                   lex_version=lex_version)
+                                   lex_version=lex_version,
+                                   use_filter=use_filter,
+                                   preprocess=preprocess)
 
         # pudb.set_trace()
         result = {'aggregate': analysis_result['aggregate'],
@@ -141,7 +153,8 @@ def _make_sent_result(emotions):
 
 
 def _analyze(text, output_format='list', sent_list=False,
-             sent_strs=False, lex_version='base'):
+             sent_strs=False, lex_version='base',
+             use_filter=True, preprocess=False):
     """Analyze a text using Syuzhet and TreeTagger."""
     tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
                             TAGDIR=cmgr.get_treetagger_path())
@@ -151,11 +164,18 @@ def _analyze(text, output_format='list', sent_list=False,
     elif lex_version == 'enhanced':
         lex = emolex_enhanced
 
-    analyzer = syuzhet.SyuzhetWithFilter(language, tagger,
-                                         emotions_array_length, lex)
+    if use_filter:
+        analyzer = syuzhet.SyuzhetWithFilter(language, tagger,
+                                             emotions_array_length, lex)
+    else:
+        analyzer = syuzhet.SyuzhetNoFilter(language, tagger,
+                                           emotions_array_length, lex)
+
+    # pudb.set_trace()
     analysis_result = analyzer.analyze_text(text,
                                             get_sentences=sent_list,
-                                            return_sentence_str=sent_strs)
+                                            return_sentence_str=sent_strs,
+                                            preprocess=preprocess)
     # pudb.set_trace()
 
     analyzer = None

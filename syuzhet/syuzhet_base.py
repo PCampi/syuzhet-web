@@ -23,7 +23,7 @@ class SyuzhetABC(ABC):
         self.splitter = TextSplitter(self.language)
 
     def analyze_text(self, text, get_sentences=False,
-                     return_sentence_str=False):
+                     return_sentence_str=False, preprocess=False):
         """Extract emotions from a text.
 
         Parameters
@@ -36,8 +36,11 @@ class SyuzhetABC(ABC):
         numpy.array:
             the sum of all emotions found in the text
         """
-        preprocessed_text = preprocess_for_analysis(text)
-        sentences_str = self.splitter.text_to_sentences(preprocessed_text)
+        if preprocess:
+            preprocessed_text = preprocess_for_analysis(text)
+            sentences_str = self.splitter.text_to_sentences(preprocessed_text)
+        else:
+            sentences_str = self.splitter.text_to_sentences(text)
 
         if get_sentences:
             orig_sentences, to_lemmatize, sent_to_return = tee(
@@ -78,9 +81,7 @@ class SyuzhetABC(ABC):
             result['sentence_list'] = list(map(list, sent_to_return))
 
         if return_sentence_str:
-            sents_to_return = self.splitter.text_to_sentences(
-                            preprocess_for_sentence_splitting(text))
-            result['sentences_as_str'] = sents_to_return
+            result['sentences_as_str'] = sentences_str
 
         return result
 
