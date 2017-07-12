@@ -12,33 +12,30 @@ emo_names = ['rabbia', 'anticipazione', 'disgusto', 'paura', 'gioia',
              'tristezza', 'sorpresa', 'fiducia']
 
 
-def workflow():
-    result_auto = analyze_file(test_file)
-    sent_auto = result_auto['sentences']
-    emo_auto = transpose_list(sent_auto)
+def accuracy(human, machine):
+    if len(human) != len(machine):
+        raise Exception("Lengths different!")
 
-    sent_human = load_human()
-    emo_human = transpose_list(sent_human)
+    n = len(human)
+    ok_vec = [0, 0, 0, 0, 0, 0, 0, 0]
 
-    res = [compare_series(h, a) for h, a in zip(emo_human, emo_auto)]
+    for i in range(n):
+        h = human[i]
+        m = machine[i]
+        if len(h) != len(m):
+            raise Exception("Subdata lengths differ!!!")
 
-    for i in range(len(res)):
-        equals, diff = res[i]
-        percent_equals = sum(equals) / len(equals)
-        print("Emozione: {}, accuratezza: {:.2f}%".format(emo_names[i],
-                                                          percent_equals * 100)
-              )
+        for j in range(len(h)):
+            if (h[j] > 0 and m[j] > 0) or (h[j] == 0 and m[j] == 0):
+                ok_vec[j] = ok_vec[j] + 1
 
-    return res
+    accuracy = [ok / n for ok in ok_vec]
+
+    return ok_vec, accuracy
 
 
 def transpose_list(l):
     return np.transpose(np.array(l)).tolist()
-
-
-def load_human(filepath="./accuracy_data/Ragazzo da parete - taggato.csv"):
-    df = pd.read_csv(filepath)
-    return df.values[:, 1:].tolist()
 
 
 def analyze_file(lex_version, file_path=test_file):
@@ -56,12 +53,19 @@ def analyze_file(lex_version, file_path=test_file):
     return result
 
 
-def go(sent, start=0):
+def go(sent, emotions, start=0):
     i = start
     cont = True
     while i < len(sent) and cont:
         print("\n\nFrase {}".format(i))
         print(sent[i] + "\n")
+        curr_emos = emotions[i]
+        emos = ""
+        j = 0
+        for j in range(len(curr_emos)):
+            if curr_emos[j] > 0:
+                emos = emos + emo_names[j] + " "
+        print(emos)
         user_choice = input("Continua: [y]/n -> ")
         if user_choice == 'y' or user_choice == "":
             i = i + 1
@@ -71,7 +75,7 @@ def go(sent, start=0):
 
 def go_to_sentence(sentences, index):
     if index >= 0 and index < len(sentences):
-        print(" ".join(sentences[index]))
+        print(sentences[index] + '\n')
     else:
         raise ValueError("Index out of bounds: {}".format(index))
 
