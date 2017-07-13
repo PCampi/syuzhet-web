@@ -12,7 +12,31 @@ emo_names = ['rabbia', 'anticipazione', 'disgusto', 'paura', 'gioia',
              'tristezza', 'sorpresa', 'fiducia']
 
 
-def accuracy(human, machine):
+def acc(human, machine):
+    if len(human) != len(machine):
+        raise Exception("Lengths different!")
+
+    n = len(human)
+    ok_vec = [0, 0, 0, 0, 0, 0, 0, 0]
+    null_count = [0, 0, 0, 0, 0, 0, 0, 0]
+
+    for i in range(n):
+        h = human[i]
+        m = machine[i]
+        if len(h) != len(m):
+            raise Exception("Subdata lengths differ!!!")
+
+        for j in range(len(h)):
+            if h[j] == 0 and m[j] == 0:
+                null_count[j] += 1
+            if h[j] > 0 and m[j] > 0:
+                ok_vec[j] += 1
+
+    accuracy = [ok/(n - nulls) for ok, nulls in zip(ok_vec, null_count)]
+    return accuracy, ok_vec, null_count
+
+
+def accuracy_keep_zeros(human, machine):
     if len(human) != len(machine):
         raise Exception("Lengths different!")
 
