@@ -1,11 +1,12 @@
 {
-	"treetagger_dir_mac": "syuzhet/treetagger-mac",
-	"treetagger_dir_linux": "syuzhet/treetagger-linux",
-	"default_language": "italian",
-	"secondary_language": "english",
-	"emotion_array_length": 8,
-	"data_dir": "data",
-	"emolex_it_filename": "EmoLex_it_no_sentiment.pickle",
-	"emolex_en_filename": "EmoLex_en.pickle",
-	"emotion_names": ["Rabbia","Anticipazione","Disgusto","Paura","Gioia","Tristezza","Sorpresa","Fiducia"]
+    "treetagger_dir_mac": "syuzhet/treetagger-mac",
+    "treetagger_dir_linux": "syuzhet/treetagger-linux",
+    "default_language": "italian",
+    "secondary_language": "english",
+    "emotion_array_length": 8,
+    "data_dir": "data",
+    "emolex_it_filename": "EmoLex_it_no_sentiment.pickle",
+    "emolex_en_filename": "EmoLex_en.pickle",
+    "emolex_enhanced_filename": "EmoLex_augmented_it.pickle",
+    "emotion_names": ["Rabbia","Anticipazione","Disgusto","Paura","Gioia","Tristezza","Sorpresa","Fiducia"]
 }

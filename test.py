@@ -11,7 +11,7 @@ cmgr.load_config()
 language = cmgr.get_default_language()
 emotions_array_length = cmgr.get_emotion_array_length()
 data_dir = cmgr.get_data_dir()
-emolex_filename = cmgr.get_emolex_filename(language)
+emolex_filename = cmgr.get_lexicon_filename(language)
 
 emolex_abs_path = get_absolute_path('syuzhet/'
                                     + data_dir + '/' + emolex_filename)

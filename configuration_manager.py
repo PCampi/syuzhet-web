@@ -61,7 +61,7 @@ class ConfigurationManager():
         except Exception as e:
             raise e
 
-    def get_emolex_filename(self, language):
+    def get_lexicon_filename(self, language):
         """Get the path of the EmoLex lexicon file for specified language."""
         if language == self.get_default_language():
             key = 'emolex_it_filename'
@@ -73,6 +73,13 @@ class ConfigurationManager():
 
         try:
             return self.conf_dict[key]
+        except Exception as e:
+            raise e
+
+    def get_enhanced_lexicon_filename(self):
+        """Get the path of the enhanced lexicon."""
+        try:
+            return self.conf_dict['emolex_enhanced_filename']
         except Exception as e:
             raise e
 
