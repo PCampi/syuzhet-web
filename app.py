@@ -9,6 +9,7 @@ import syuzhet
 from path_problem_resolver import get_absolute_path
 from configuration_manager import ConfigurationManager
 import postprocessing
+import persistence
 
 cmgr = ConfigurationManager("config.json")
 cmgr.load_config()
@@ -33,9 +34,8 @@ with open(emolex_abs_path, 'rb') as f:
 with open(emolex_enh_path, 'rb') as f:
     emolex_enhanced = pickle.load(f)
 
-
-# Latest text, used as a cache
-latest_text = None
+# Cache
+cache = persistence.PersistencyManager()
 
 # Main application
 app = Flask(__name__)
@@ -96,6 +96,11 @@ def analyze_text():
                                    use_filter=use_filter,
                                    preprocess=preprocess)
 
+        # Save the result in a file and store the cache name
+        current_id = str(int(time.time()))
+        cache.save_cache(np.array(analysis_result['sentences']),
+                         current_id)
+
         result = {'aggregate': analysis_result['aggregate'].tolist(),
                   'emotions': _make_sent_result(analysis_result['sentences'])}
 
@@ -107,28 +112,18 @@ def analyze_text():
         if postproc_flag:
             try:
                 n_harmonics = req_contents['number_of_harmonics']
-                if n_harmonics == []:
+                if not n_harmonics or n_harmonics == []:
                     n_harmonics = [5, 10, 15, 20]
             except KeyError:
                 # set the default value
                 n_harmonics = [5, 10, 15, 20]
 
-            if isinstance(n_harmonics, list):
-                postproc = {str(n): postprocessing.smooth_emotions(
-                    np.array(analysis_result['sentences']),
-                    number_of_harmonics=n
-                )
-                    for n in n_harmonics}
-            elif isinstance(n_harmonics, int):
-                postproc = {str(n_harmonics): postprocessing.smooth_emotions(
-                    np.array(analysis_result['sentences']),
-                    number_of_harmonics=n_harmonics
-                )}
+            postproc = _postprocess(np.array(analysis_result['sentences']),
+                                    n_harmonics)
             result['harmonics'] = _make_postproc_dict(postproc)
 
         if get_sentences:
-            result['splitted_sentences'] =\
-                analysis_result['splitted_sentences']
+            result['splitted_sentences'] = analysis_result['splitted_sentences']
 
         result_dict = make_result_dict(result, emo_names=emotion_names,
                                        request_id=str(int(time.time())))
@@ -141,19 +136,38 @@ def analyze_text():
 @app.route('/postprocess', methods=['POST'])
 def postprocess_result():
     """Postprocess the result of an analysis."""
-    pass
+    req_contents = request.get_json(silent=True)
+
+    try:
+        text_id = req_contents['text_id']
+        if cache.cache_time != text_id:
+            response_dict = make_error_response("Invalid 'text_id', it should be {}".format(cache.cache_time))
+            return jsonify(response_dict)
+
+        try:
+            n_harmonics = req_contents['number_of_harmonics']
+            ndarray = cache.load_cache()
+            postproc = _postprocess(ndarray, n_harmonics)
+
+            result = {'text_id': text_id,
+                      'harmonics': _make_postproc_dict(postproc)}
+            return jsonify(result)
+        except KeyError:
+            response_dict = make_error_response("Missing number of harmonics in request")
+            return jsonify(response_dict)
+    except KeyError:
+        response_dict = make_error_response("Missing 'text_id' field.")
+        return jsonify(response_dict)
 
 
-def make_result_dict(data, request_id=None, corpus=None,
-                     document=None, emo_names=None):
+
+def make_result_dict(data, request_id=None, emo_names=None):
     """Create a JSON with the results and all other fields."""
     if data is None or data == []:
         res = make_error_response("Empty analysis result.")
         return res
 
-    tpls = [('id', request_id),
-            ('corpus', corpus),
-            ('document', document),
+    tpls = [('text_id', request_id),
             ('emotion_names', emo_names),
             ('result', data)]
 
@@ -191,6 +205,33 @@ def _make_sent_result(emotions):
               for i in range(len(emotion_names))}
 
     return result
+
+def _postprocess(data, n_harmonics):
+    """Postprocess the data.
+
+    Parameters
+    ----------
+    data: np.ndarray
+        ndarray where the i-th row is a sentence, and the
+        j-th column is the emotion
+
+    n_harmonics: List[int > 0]
+        list of numbers of harmonics to use, or a single integer value
+
+    Returns
+    -------
+    postprocessed: Dict[str: np.ndarray]
+        dictionary where the keys are the number of harmonics used,
+        values are the filtered emotions
+    """
+    if isinstance(n_harmonics, int):
+        return _postprocess(data, [n_harmonics])
+
+    if isinstance(n_harmonics, list):
+        return {str(n):
+                postprocessing.smooth_emotions(data,
+                                               number_of_harmonics=n)
+                for n in n_harmonics}
 
 
 def _make_postproc_dict(postproc):
