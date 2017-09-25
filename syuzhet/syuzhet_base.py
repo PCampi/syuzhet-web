@@ -8,7 +8,6 @@ import numpy as np
 from .splitting import TextSplitter
 from .lemmatization import Lemmatizer
 from .preprocessing import preprocess_for_analysis
-from .preprocessing import preprocess_for_sentence_splitting
 
 
 class SyuzhetABC(ABC):
@@ -28,13 +27,27 @@ class SyuzhetABC(ABC):
 
         Parameters
         ----------
-        text:
+        text: str
             the text to extract emotions from
+
+        get_sentences: bool
+            if True, also return the tokenized sentences
+
+        return_sentence_str: bool
+            if True, also return the list of sentences as a list of str
+
+        preprocess: bool
+            if True, preprocess all dialogues and punctuation for better
+            tokenization
 
         Returns
         -------
-        numpy.array:
-            the sum of all emotions found in the text
+        dict:
+            dictionary with keys
+            - "aggregate": the aggregate emotional value of the text
+            - "sentences": list of per-sentence emotion array
+            - "sentence_list": list of lists of strings, each one a sentence
+            - "sentences_as_str": list of strings, each one a sentence
         """
         if preprocess:
             preprocessed_text = preprocess_for_analysis(text)
@@ -125,5 +138,5 @@ class SyuzhetABC(ABC):
                     i = i + 1
 
                 return has_value
-        except KeyError as e:
+        except KeyError:
             return False

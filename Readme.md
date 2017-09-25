@@ -14,34 +14,27 @@ The API exposes the following endpoints:
 The service accepts JSON data within an HTTP POST request.
 The JSON data should have the following fields:
 
--   id: a number identifying the id of the sent text
--   corpus: will be returned as is
--   document: will be returned as is
 -   content (**required**): the text to analyze
+-   postprocessing: boolean indicating wether to return post-processed harmonics too (see section [Harmonics postprocessing](#harmonics-postprocessing)); you should choose the number of harmonics you want with the "number\_of_harmonics" field (default is [5, 10, 15, 20])
+-   number\_of_harmonics: integer or Array of integer values specifying the number of harmonics you want for postprocessing.
 
 
 ```javascript
 {
-    "id": number,
-    "corpus": "name_of_corpus",
-    "document": "name_of_document",
     "content": "Text of the document..."
+    "postprocessing": boolean,
+    "number_of_harmonics": integer > 0 or Array[integer > 0]
 }
 ```
-
-**Warning**:
-
-The only true required field of the request is the `content` field that defines the text to analyze. All other fields are irrelevant (at the moment).
 
 ### Example request
 Here is a sample request object,
 
 ```javascript
 {
-    "id": 13,
-    "corpus": "paziente X",
-    "document": "Diario del giorno 22/03/2017",
-    "content": "Stamattina mi sono svegliato con un gran mal di testa.\nCi sono voluti venti minuti per..."
+	"content": "Stamattina mi sono svegliato con un gran mal di testa.\nCi sono voluti venti minuti per...",
+	"postprocessing": true,
+	"number_of_harmonics": [2, 5, 10]  // override the default
 }
 ```
 
@@ -73,16 +66,67 @@ The service will answer with a JSON formatted as follows:
 
 ```javascript
 {
-    "id": number, // if present in request
-    "corpus": "the corpus name", // if present in request
-    "document": "the document name", // if present in request
+    "text_id": integer number, // id to use to refer to the same text in subsequent calls.
     "emotion-names": [array of Strings mapping the emotion names],
     "result": {
         "aggregate": [array of 10 values, one for each emotion],
-        "sentences": [[10 values for sentence 1],
-                                [10 values for sentence 2],
-                                [10 values for sentence 3], ...]
-    }
+        "emotions": {"emotion_1": [values of emotion_1 in each sentence],
+			         "emotion_2": [values of emotion_2 in each sentence],
+                     ...
+                     },
+	    "harmonics": {"5": {
+	    					"emotion_1": [values of harmonics for emotion_1],
+	    					"emotion_1": [values of harmonics for emotion_2],
+	    					...
+	    					},
+	    			  "10": {
+	    					"emotion_1": [values of harmonics for emotion_1],
+	    					"emotion_1": [values of harmonics for emotion_2],
+	    					...
+	    					}
+	    				}
+	    }
+}
+```
+
+**Note**: the `harmonics` field will be present only if requested in the request.
+
+## Harmonics postprocessing
+There are two ways to get post-processed data from the service:
+
+1. set the "postprocessing" flag to true in the request and specify the number of harmonics you want
+2. make a POST request to the `/postprocess` endpoint. The request **must** contain:
+	- the id of the text as returned by the service when it was analyzed
+	- the number of harmonics you want as a single integer or integer array
+
+For example, let's say that you analyzed a text and its `id` is 2459. A request to get 10, 20 and 100 harmonics would be:
+
+```javascript
+{
+	"text_id": 2459,
+	"number_of_harmonics": [10, 20, 100]
+}
+```
+
+The response will look like:
+
+```javascript
+{
+	"text_id": 2459,
+	"harmonics":
+		{"10":
+			{"emotion_name_1": [array of values...],
+			 "emotion_name_2": [array of values...],
+			 ...},
+		 "20":
+		 	{"emotion_name_1": [array of values...],
+			 "emotion_name_2": [array of values...],
+			 ...},
+		 "100":
+		 	{"emotion_name_1": [array of values...],
+			 "emotion_name_2": [array of values...],
+			 ...}
+		}
 }
 ```
 

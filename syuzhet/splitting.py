@@ -4,7 +4,7 @@ import nltk.tokenize
 import nltk.data
 
 
-class TextSplitter():
+class TextSplitter:
     """Split text into sentences or words."""
 
     def __init__(self, language):
@@ -20,7 +20,7 @@ class TextSplitter():
 
         Returns
         -------
-        list:
+        List[str]:
             a list of strings, each of which is a sentence in the original text
         """
         # load the nltk data Punkt tokenizer for the selected language
@@ -30,8 +30,7 @@ class TextSplitter():
         sentences = sentence_tokenizer.tokenize(text)
         return sentences
 
-    def sentence_to_words(self, sentence: str) -> List[
-            str]:
+    def sentence_to_words(self, sentence: str) -> List[str]:
         """Get all the words in the sentence.
 
         Parameters
@@ -41,8 +40,8 @@ class TextSplitter():
 
         Returns
         -------
-        list:
-            a list of lowercased words and punctuation tokens
+        List[str]:
+            a list of lower cased words and punctuation tokens
         """
         tokens = nltk.tokenize.word_tokenize(sentence, language=self.language)
         result = [token.lower() for token in tokens]
