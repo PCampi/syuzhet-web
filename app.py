@@ -141,8 +141,8 @@ def postprocess_result():
     try:
         text_id = req_contents['text_id']
         if cache.cache_time != text_id:
-            response_dict = make_error_response("Invalid 'text_id', it should be {}".format(cache.cache_time))
-            return jsonify(response_dict)
+            err_response = make_error_response("Invalid 'text_id', it should be {}".format(cache.cache_time))
+            return jsonify(err_response)
 
         try:
             n_harmonics = req_contents['number_of_harmonics']
@@ -153,11 +153,11 @@ def postprocess_result():
                       'harmonics': _make_postproc_dict(postproc)}
             return jsonify(result)
         except KeyError:
-            response_dict = make_error_response("Missing number of harmonics in request")
-            return jsonify(response_dict)
+            err_response = make_error_response("Missing number of harmonics in request")
+            return jsonify(err_response)
     except KeyError:
-        response_dict = make_error_response("Missing 'text_id' field.")
-        return jsonify(response_dict)
+        err_response = make_error_response("Missing 'text_id' field.")
+        return jsonify(err_response)
 
 
 

@@ -129,6 +129,3 @@ The response will look like:
 		}
 }
 ```
-
-### Notes
-At the moment, the API only outputs the aggregate and the per-sentence value of the 10 emotions. More options will come, along with more useful output (postprocessed output like Fourier...whatever!).
