@@ -61,26 +61,21 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2 id="request-format">Request format</h2>
 <p>The service accepts JSON data within an HTTP POST request. The JSON data should have the following fields:</p>
 <ul>
-<li>id: a number identifying the id of the sent text</li>
-<li>corpus: will be returned as is</li>
-<li>document: will be returned as is</li>
 <li>content (<strong>required</strong>): the text to analyze</li>
+<li>postprocessing: boolean indicating wether to return post-processed harmonics too (see section <a href="#harmonics-postprocessing">Harmonics postprocessing</a>); you should choose the number of harmonics you want with the &quot;number_of_harmonics&quot; field (default is [5, 10, 15, 20])</li>
+<li>number_of_harmonics: integer or Array of integer values specifying the number of harmonics you want for postprocessing.</li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
-    <span class="st">&quot;id&quot;</span><span class="op">:</span> number<span class="op">,</span>
-    <span class="st">&quot;corpus&quot;</span><span class="op">:</span> <span class="st">&quot;name_of_corpus&quot;</span><span class="op">,</span>
-    <span class="st">&quot;document&quot;</span><span class="op">:</span> <span class="st">&quot;name_of_document&quot;</span><span class="op">,</span>
     <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;Text of the document...&quot;</span>
+    <span class="st">&quot;postprocessing&quot;</span><span class="op">:</span> boolean<span class="op">,</span>
+    <span class="st">&quot;number_of_harmonics&quot;</span><span class="op">:</span> integer <span class="op">&gt;</span> <span class="dv">0</span> or Array[integer <span class="op">&gt;</span> <span class="dv">0</span>]
 <span class="op">}</span></code></pre></div>
-<p><strong>Warning</strong>:</p>
-<p>The only true required field of the request is the <code>content</code> field that defines the text to analyze. All other fields are irrelevant (at the moment).</p>
 <h3 id="example-request">Example request</h3>
 <p>Here is a sample request object,</p>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
-    <span class="st">&quot;id&quot;</span><span class="op">:</span> <span class="dv">13</span><span class="op">,</span>
-    <span class="st">&quot;corpus&quot;</span><span class="op">:</span> <span class="st">&quot;paziente X&quot;</span><span class="op">,</span>
-    <span class="st">&quot;document&quot;</span><span class="op">:</span> <span class="st">&quot;Diario del giorno 22/03/2017&quot;</span><span class="op">,</span>
-    <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;Stamattina mi sono svegliato con un gran mal di testa.</span><span class="sc">\n</span><span class="st">Ci sono voluti venti minuti per...&quot;</span>
+    <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;Stamattina mi sono svegliato con un gran mal di testa.</span><span class="sc">\n</span><span class="st">Ci sono voluti venti minuti per...&quot;</span><span class="op">,</span>
+    <span class="st">&quot;postprocessing&quot;</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span>
+    <span class="st">&quot;number_of_harmonics&quot;</span><span class="op">:</span> [<span class="dv">2</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">10</span>]  <span class="co">// override the default</span>
 <span class="op">}</span></code></pre></div>
 <p>and here is jQuery code to analyze a text</p>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="co">// IMPORTANT! make a JSON string from the content of a JSON object</span>
@@ -104,18 +99,60 @@ data_to_send <span class="op">=</span> <span class="va">JSON</span>.<span class=
 <h2 id="response-format">Response format</h2>
 <p>The service will answer with a JSON formatted as follows:</p>
 <div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
-    <span class="st">&quot;id&quot;</span><span class="op">:</span> number<span class="op">,</span> <span class="co">// if present in request</span>
-    <span class="st">&quot;corpus&quot;</span><span class="op">:</span> <span class="st">&quot;the corpus name&quot;</span><span class="op">,</span> <span class="co">// if present in request</span>
-    <span class="st">&quot;document&quot;</span><span class="op">:</span> <span class="st">&quot;the document name&quot;</span><span class="op">,</span> <span class="co">// if present in request</span>
+    <span class="st">&quot;text_id&quot;</span><span class="op">:</span> integer number<span class="op">,</span> <span class="co">// id to use to refer to the same text in subsequent calls.</span>
     <span class="st">&quot;emotion-names&quot;</span><span class="op">:</span> [array of Strings mapping the emotion names]<span class="op">,</span>
     <span class="st">&quot;result&quot;</span><span class="op">:</span> <span class="op">{</span>
         <span class="st">&quot;aggregate&quot;</span><span class="op">:</span> [array of <span class="dv">10</span> values<span class="op">,</span> one <span class="cf">for</span> each emotion]<span class="op">,</span>
-        <span class="st">&quot;sentences&quot;</span><span class="op">:</span> [[<span class="dv">10</span> values <span class="cf">for</span> sentence <span class="dv">1</span>]<span class="op">,</span>
-                                [<span class="dv">10</span> values <span class="cf">for</span> sentence <span class="dv">2</span>]<span class="op">,</span>
-                                [<span class="dv">10</span> values <span class="cf">for</span> sentence <span class="dv">3</span>]<span class="op">,</span> ...]
-    <span class="op">}</span>
+        <span class="st">&quot;emotions&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;emotion_1&quot;</span><span class="op">:</span> [values of emotion_1 <span class="kw">in</span> each sentence]<span class="op">,</span>
+                     <span class="st">&quot;emotion_2&quot;</span><span class="op">:</span> [values of emotion_2 <span class="kw">in</span> each sentence]<span class="op">,</span>
+                     ...
+                     <span class="op">},</span>
+        <span class="st">&quot;harmonics&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;5&quot;</span><span class="op">:</span> <span class="op">{</span>
+                            <span class="st">&quot;emotion_1&quot;</span><span class="op">:</span> [values of harmonics <span class="cf">for</span> emotion_1]<span class="op">,</span>
+                            <span class="st">&quot;emotion_1&quot;</span><span class="op">:</span> [values of harmonics <span class="cf">for</span> emotion_2]<span class="op">,</span>
+                            ...
+                            <span class="op">},</span>
+                      <span class="st">&quot;10&quot;</span><span class="op">:</span> <span class="op">{</span>
+                            <span class="st">&quot;emotion_1&quot;</span><span class="op">:</span> [values of harmonics <span class="cf">for</span> emotion_1]<span class="op">,</span>
+                            <span class="st">&quot;emotion_1&quot;</span><span class="op">:</span> [values of harmonics <span class="cf">for</span> emotion_2]<span class="op">,</span>
+                            ...
+                            <span class="op">}</span>
+                        <span class="op">}</span>
+        <span class="op">}</span>
 <span class="op">}</span></code></pre></div>
-<h3 id="notes">Notes</h3>
-<p>At the moment, the API only outputs the aggregate and the per-sentence value of the 10 emotions. More options will come, along with more useful output (postprocessed output like Fourier...whatever!).</p>
+<p><strong>Note</strong>: the <code>harmonics</code> field will be present only if requested in the request.</p>
+<h2 id="harmonics-postprocessing">Harmonics postprocessing</h2>
+<p>There are two ways to get post-processed data from the service:</p>
+<ol type="1">
+<li>set the &quot;postprocessing&quot; flag to true in the request and specify the number of harmonics you want</li>
+<li>make a POST request to the <code>/postprocess</code> endpoint. The request <strong>must</strong> contain:
+<ul>
+<li>the id of the text as returned by the service when it was analyzed</li>
+<li>the number of harmonics you want as a single integer or integer array</li>
+</ul></li>
+</ol>
+<p>For example, let's say that you analyzed a text and its <code>id</code> is 2459. A request to get 10, 20 and 100 harmonics would be:</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
+    <span class="st">&quot;text_id&quot;</span><span class="op">:</span> <span class="dv">2459</span><span class="op">,</span>
+    <span class="st">&quot;number_of_harmonics&quot;</span><span class="op">:</span> [<span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">100</span>]
+<span class="op">}</span></code></pre></div>
+<p>The response will look like:</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="op">{</span>
+    <span class="st">&quot;text_id&quot;</span><span class="op">:</span> <span class="dv">2459</span><span class="op">,</span>
+    <span class="st">&quot;harmonics&quot;</span><span class="op">:</span>
+        <span class="op">{</span><span class="st">&quot;10&quot;</span><span class="op">:</span>
+            <span class="op">{</span><span class="st">&quot;emotion_name_1&quot;</span><span class="op">:</span> [array of <span class="va">values</span>...]<span class="op">,</span>
+             <span class="st">&quot;emotion_name_2&quot;</span><span class="op">:</span> [array of <span class="va">values</span>...]<span class="op">,</span>
+             ...<span class="op">},</span>
+         <span class="st">&quot;20&quot;</span><span class="op">:</span>
+            <span class="op">{</span><span class="st">&quot;emotion_name_1&quot;</span><span class="op">:</span> [array of <span class="va">values</span>...]<span class="op">,</span>
+             <span class="st">&quot;emotion_name_2&quot;</span><span class="op">:</span> [array of <span class="va">values</span>...]<span class="op">,</span>
+             ...<span class="op">},</span>
+         <span class="st">&quot;100&quot;</span><span class="op">:</span>
+            <span class="op">{</span><span class="st">&quot;emotion_name_1&quot;</span><span class="op">:</span> [array of <span class="va">values</span>...]<span class="op">,</span>
+             <span class="st">&quot;emotion_name_2&quot;</span><span class="op">:</span> [array of <span class="va">values</span>...]<span class="op">,</span>
+             ...<span class="op">}</span>
+        <span class="op">}</span>
+<span class="op">}</span></code></pre></div>
 </body>
 </html>
