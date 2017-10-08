@@ -20,6 +20,6 @@ class PersistencyManager:
         try:
             if self.__cache_name == "":
                 raise IOError("File does not exist yet!")
-            return np.load(get_absolute_path(self.__cache_name))
+            return np.load(get_absolute_path(self.__cache_name) + ".npy")
         except IOError:
             raise

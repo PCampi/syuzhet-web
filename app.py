@@ -1,15 +1,16 @@
+import pickle
 import time
+
+import numpy as np
+import treetaggerwrapper as ttw
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-import treetaggerwrapper as ttw
-import pickle
-import numpy as np
 
-import syuzhet
-from path_problem_resolver import get_absolute_path
-from configuration_manager import ConfigurationManager
-import postprocessing
 import persistence
+import postprocessing
+import syuzhet
+from configuration_manager import ConfigurationManager
+from path_problem_resolver import get_absolute_path
 
 cmgr = ConfigurationManager("config.json")
 cmgr.load_config()
@@ -140,7 +141,7 @@ def postprocess_result():
 
     try:
         text_id = req_contents['text_id']
-        if cache.cache_time != text_id:
+        if int(cache.cache_time) != text_id:
             err_response = make_error_response("Invalid 'text_id', it should be {}".format(cache.cache_time))
             return jsonify(err_response)
 
@@ -158,7 +159,6 @@ def postprocess_result():
     except KeyError:
         err_response = make_error_response("Missing 'text_id' field.")
         return jsonify(err_response)
-
 
 
 def make_result_dict(data, request_id=None, emo_names=None):
@@ -206,6 +206,7 @@ def _make_sent_result(emotions):
 
     return result
 
+
 def _postprocess(data, n_harmonics):
     """Postprocess the data.
 
@@ -229,8 +230,8 @@ def _postprocess(data, n_harmonics):
 
     if isinstance(n_harmonics, list):
         return {str(n):
-                postprocessing.smooth_emotions(data,
-                                               number_of_harmonics=n)
+                    postprocessing.smooth_emotions(data,
+                                                   number_of_harmonics=n)
                 for n in n_harmonics}
 
 
@@ -249,10 +250,11 @@ def _make_postproc_dict(postproc):
         dictionary where first-level keys are the numbers of harmonics,
         the second-level keys are the emotion names
     """
-    return {n_harmonics: {emotion_names[j]: postproc[n_harmonics][:, j].tolist()
-                  for j in range(postproc[n_harmonics].shape[1])}
+    return {n_harmonics: {emotion_names[j]:
+                              list(map((lambda x: x if x >= 1e-3 else 0),
+                                       postproc[n_harmonics][:, j].tolist()))
+                          for j in range(postproc[n_harmonics].shape[1])}
             for n_harmonics in postproc}
-
 
 
 def _analyze(text, sent_list=False, sent_strs=False, lex_version='base',
@@ -322,6 +324,7 @@ def _convert_result_to_list(data):
     """Convert analysis result to list instead of np.ndarray.
     Utility for postprocessing.
     """
+
     def ffun(k, v):
         if k == 'aggregate':
             return v.tolist()
