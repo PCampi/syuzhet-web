@@ -5,6 +5,7 @@ import numpy as np
 import treetaggerwrapper as ttw
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
+from nltk.corpus import stopwords
 
 import persistence
 import postprocessing
@@ -142,7 +143,8 @@ def postprocess_result():
     try:
         text_id = req_contents['text_id']
         if int(cache.cache_time) != text_id:
-            err_response = make_error_response("Invalid 'text_id', it should be {}".format(cache.cache_time))
+            err_response = make_error_response(
+                "Invalid 'text_id', it should be {}".format(cache.cache_time))
             return jsonify(err_response)
 
         try:
@@ -154,10 +156,50 @@ def postprocess_result():
                       'harmonics': _make_postproc_dict(postproc)}
             return jsonify(result)
         except KeyError:
-            err_response = make_error_response("Missing number of harmonics in request")
+            err_response = make_error_response(
+                "Missing number of harmonics in request")
             return jsonify(err_response)
     except KeyError:
         err_response = make_error_response("Missing 'text_id' field.")
+        return jsonify(err_response)
+
+
+@app.route('/lemmatize', methods=['POST'])
+def lemmatize_input():
+    """Lemmatize a text given in the input JSON."""
+    req_contents = request.get_json(silent=True)
+
+    try:
+        text = req_contents["text"]
+
+        try:
+            delete_stopwords = req_contents["delete_stopwords"]
+        except KeyError:
+            delete_stopwords = True
+
+        tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
+                                TAGDIR=cmgr.get_treetagger_path())
+        lemmatizer = syuzhet.Lemmatizer(tagger)
+        splitter = syuzhet.TextSplitter(language)
+
+        splitted_into_sentences = splitter.text_to_sentences(text)
+        sentences = map(splitter.sentence_to_words, splitted_into_sentences)
+        lemmatized_sentences = [lemmatizer.lemmatize(s)
+                                for s in sentences]
+
+        if delete_stopwords:
+            stop_words = set(stopwords.words("italian"))
+            stop_words_punct = stop_words.union({",", ";", ".", ":", "?", "!", "'"})
+            filtered_sentences_no_stopwords = \
+                [list(filter((lambda x: x not in stop_words_punct), sentence))
+                 for sentence in lemmatized_sentences]
+            response = {"sentences": filtered_sentences_no_stopwords}
+        else:
+            response = {"sentences": lemmatized_sentences}
+
+        return jsonify(response)
+    except KeyError:
+        err_response = make_error_response("Missing text to lemmatize.")
         return jsonify(err_response)
 
 
@@ -230,8 +272,8 @@ def _postprocess(data, n_harmonics):
 
     if isinstance(n_harmonics, list):
         return {str(n):
-                    postprocessing.smooth_emotions(data,
-                                                   number_of_harmonics=n)
+                postprocessing.smooth_emotions(data,
+                                               number_of_harmonics=n)
                 for n in n_harmonics}
 
 
@@ -251,8 +293,8 @@ def _make_postproc_dict(postproc):
         the second-level keys are the emotion names
     """
     return {n_harmonics: {emotion_names[j]:
-                              list(map((lambda x: x if x >= 1e-3 else 0),
-                                       postproc[n_harmonics][:, j].tolist()))
+                          list(map((lambda x: x if x >= 1e-3 else 0),
+                                   postproc[n_harmonics][:, j].tolist()))
                           for j in range(postproc[n_harmonics].shape[1])}
             for n_harmonics in postproc}
 
@@ -330,8 +372,7 @@ def _convert_result_to_list(data):
             return v.tolist()
         elif k == 'sentences':
             return [x.tolist() for x in v]
-        else:
-            return v
+        return v
 
     return {key: ffun(key, val) for key, val in data}
 

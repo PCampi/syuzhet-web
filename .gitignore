@@ -99,6 +99,10 @@ ENV/
 
 # Imdone Atom plugin
 .imdone
+
+# Visual Studio Code files
+.vscode
+
 translate_emolex
 
 syuzhet/treetagger-mac

@@ -6,7 +6,7 @@ from .emotion_filter import choose_emotions
 
 
 class SyuzhetWithFilter(SyuzhetABC):
-    """Syuzhet text analyzer class, no filter version."""
+    """Syuzhet text analyzer class, with filter word filtering."""
 
     def emotions_for_sentence(self, sentence):
         """Get the emotions for a sentence.

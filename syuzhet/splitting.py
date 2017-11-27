@@ -10,7 +10,7 @@ class TextSplitter:
     def __init__(self, language):
         self.language = language
 
-    def text_to_sentences(self, text: str,) -> List[str]:
+    def text_to_sentences(self, text: str) -> List[str]:
         """Split a text into sentences.
 
         Parameters

@@ -114,7 +114,7 @@ class SyuzhetABC(ABC):
                         i = i + 1
 
                     return has_value
-            except KeyError as e:
+            except KeyError:
                 return False
 
         result = [[w for w in filter(filter_func, s)] for s in sentences]
