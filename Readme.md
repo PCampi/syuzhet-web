@@ -9,6 +9,57 @@ The API exposes the following endpoints:
 -   [https://syuzhet-web.herokuapp.com/](https://syuzhet-web.herokuapp.com/): main entry point where you can find this help;
 -   [https://syuzhet-web.herokuapp.com/analyze](https://syuzhet-web.herokuapp.com/analyze): RESTFul endpoint to analyze a text, must send a POST request with JSON content (see below for an example);
 -   [https://syuzhet-web.herokuapp.com/gui-test](https://syuzhet-web.herokuapp.com/gui-test): sample implementation of a GUI;
+-   [https://syuzhet-web.herokuapp.com/lemmatize](https://syuzhet-web.herokuapp.com/lemmatize): lemmatization service;
+
+## Request format for Lemmatization only
+The service accepts JSON data within an HTTP POST request.
+The JSON shall have the mandatory field `text` (String) and the optional field `delete_stopwords` (boolean, defaults to **true**).
+
+An example request is:
+
+```javascript
+{
+	"text": "Questo è il testo da lemmatizzare.
+	Dovresti ritornarlo con i lemmi soltanto, grazie.
+	Inoltre, fammi un piacere, scrivi a Link-up che ho messo
+	online il lemmatizzatore.",
+	"delete_stopwords": true
+}
+```
+
+The response is a JSON that **only** contains the lemmatized sentences, under the key `sentences`. It is an array where each element is an array of strings, representing a lemmatized sentence.
+
+The response for the request shown above is:
+
+```javascript
+{
+    "sentences": [
+        [
+            "essere",
+            "testo",
+            "lemmatizzare"
+        ],
+        [
+            "dovere",
+            "ritornare",
+            "lemma",
+            "soltanto",
+            "grazie"
+        ],
+        [
+            "inoltre",
+            "fare",
+            "piacere",
+            "scrivere",
+            "link-up",
+            "avere",
+            "mettere",
+            "online",
+            "lemmatizzatore"
+        ]
+    ]
+}
+```
 
 ## Request format
 The service accepts JSON data within an HTTP POST request.
