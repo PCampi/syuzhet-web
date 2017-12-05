@@ -68,7 +68,7 @@ def apostrophe(text):
 
 
 def guillements_in_sentence(text):
-    """Substitute all quotations in a sentence with a space."""
+    """Substitute all guillements in a sentence with a space."""
     return re.sub(r'[\u00ab]([^\u00bb]+)[\u00bb]', r' \1 ', text)
 
 

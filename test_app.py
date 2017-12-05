@@ -1,8 +1,11 @@
 """Test for the app."""
+
 import unittest
+
 import numpy as np
-from app import make_result_dict, make_error_response, _make_sent_result
-from app import emotion_names
+
+from app import (EMOTION_NAMES, _make_sent_result, make_error_response,
+                 make_result_dict)
 
 
 class AppTest(unittest.TestCase):
@@ -78,14 +81,14 @@ class AppTest(unittest.TestCase):
         sentences = [np.array([0, 1, 0, 0, 1, 1, 1, 0]),
                      np.array([1, 1, 0, 0, 0, 1, 0, 1])]
 
-        expected_result = {emotion_names[0]: [0, 1],
-                           emotion_names[1]: [1, 1],
-                           emotion_names[2]: [0, 0],
-                           emotion_names[3]: [0, 0],
-                           emotion_names[4]: [1, 0],
-                           emotion_names[5]: [1, 1],
-                           emotion_names[6]: [1, 0],
-                           emotion_names[7]: [0, 1]}
+        expected_result = {EMOTION_NAMES[0]: [0, 1],
+                           EMOTION_NAMES[1]: [1, 1],
+                           EMOTION_NAMES[2]: [0, 0],
+                           EMOTION_NAMES[3]: [0, 0],
+                           EMOTION_NAMES[4]: [1, 0],
+                           EMOTION_NAMES[5]: [1, 1],
+                           EMOTION_NAMES[6]: [1, 0],
+                           EMOTION_NAMES[7]: [0, 1]}
 
         computed = _make_sent_result(sentences)
 

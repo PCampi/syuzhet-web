@@ -106,15 +106,15 @@ class SyuzhetABC(ABC):
                 emotions = self.emolex[word]
                 if len(emotions) == 1:
                     return np.sum(emotions[0]) > 0
-                else:
-                    has_value = False
-                    i = 0
-                    while (i < len(emotions)) and (not has_value):
-                        has_value = np.sum(emotions[i]) > 0
-                        i = i + 1
 
-                    return has_value
-            except KeyError as e:
+                has_value = False
+                i = 0
+                while (i < len(emotions)) and (not has_value):
+                    has_value = np.sum(emotions[i]) > 0
+                    i = i + 1
+
+                return has_value
+            except KeyError:
                 return False
 
         result = [[w for w in filter(filter_func, s)] for s in sentences]
@@ -122,6 +122,7 @@ class SyuzhetABC(ABC):
 
     @abstractmethod
     def emotions_for_sentence(self, sentence):
+        """Main method."""
         pass
 
     def _filter_func(self, word):
@@ -130,13 +131,13 @@ class SyuzhetABC(ABC):
             emotions = self.emolex[word]
             if len(emotions) == 1:
                 return np.sum(emotions[0]) > 0
-            else:
-                has_value = False
-                i = 0
-                while (i < len(emotions)) and (not has_value):
-                    has_value = np.sum(emotions[i]) > 0
-                    i = i + 1
 
-                return has_value
+            has_value = False
+            i = 0
+            while (i < len(emotions)) and (not has_value):
+                has_value = np.sum(emotions[i]) > 0
+                i = i + 1
+
+            return has_value
         except KeyError:
             return False

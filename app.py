@@ -1,9 +1,11 @@
+"""Main app module."""
+
 import pickle
 import time
 
 import numpy as np
 import treetaggerwrapper as ttw
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 
 import persistence
@@ -12,51 +14,51 @@ import syuzhet
 from configuration_manager import ConfigurationManager
 from path_problem_resolver import get_absolute_path
 
-cmgr = ConfigurationManager("config.json")
-cmgr.load_config()
+CMGR = ConfigurationManager("config.json")
+CMGR.load_config()
 
-language = cmgr.get_default_language()
-emotions_array_length = cmgr.get_emotion_array_length()
-emotion_names = cmgr.get_emotion_names()
+LANGUAGE = CMGR.get_default_language()
+EMOTIONS_ARRAY_LENGTH = CMGR.get_emotion_array_length()
+EMOTION_NAMES = CMGR.get_emotion_names()
 
-data_dir = cmgr.get_data_dir()
-emolex_filename = cmgr.get_lexicon_filename(language)
+DATA_DIR = CMGR.get_data_dir()
+EMOLEX_FILENAME = CMGR.get_lexicon_filename(LANGUAGE)
 
-emolex_abs_path = get_absolute_path('syuzhet/'
-                                    + data_dir + '/' + emolex_filename)
+EMOLEX_ABS_PATH = get_absolute_path('syuzhet/'
+                                    + DATA_DIR + '/' + EMOLEX_FILENAME)
 
-emolex_enh_filename = cmgr.get_enhanced_lexicon_filename()
-emolex_enh_path = get_absolute_path('syuzhet/' + data_dir +
-                                    '/' + emolex_enh_filename)
+EMOLEX_ENH_FILENAME = CMGR.get_enhanced_lexicon_filename()
+EMOLEX_ENH_PATH = get_absolute_path('syuzhet/' + DATA_DIR +
+                                    '/' + EMOLEX_ENH_FILENAME)
 
-with open(emolex_abs_path, 'rb') as f:
-    emolex = pickle.load(f)
+with open(EMOLEX_ABS_PATH, 'rb') as f:
+    EMOLEX = pickle.load(f)
 
-with open(emolex_enh_path, 'rb') as f:
-    emolex_enhanced = pickle.load(f)
+with open(EMOLEX_ENH_PATH, 'rb') as f:
+    EMOLEX_ENHANCED = pickle.load(f)
 
 # Cache
-cache = persistence.PersistencyManager()
+CACHE = persistence.PersistencyManager()
 
 # Main application
-app = Flask(__name__)
-CORS(app)
+APP = Flask(__name__)
+CORS(APP)
 
 
-@app.route('/', methods=['GET'])
+@APP.route('/', methods=['GET'])
 def show_readme():
     """Show the help readme."""
-    return app.send_static_file('Readme.html')
+    return APP.send_static_file('Readme.html')
 
 
-@app.route('/gui-test', methods=['GET'])
+@APP.route('/gui-test', methods=['GET'])
 def send_gui_test():
     """Sent the text analysis page."""
     result = render_template("index.html")
     return result
 
 
-@app.route('/analyze', methods=['POST'])
+@APP.route('/analyze', methods=['POST'])
 def analyze_text():
     """Analyze a text and send response."""
     # if parsing unsuccessful, don't crash
@@ -99,7 +101,7 @@ def analyze_text():
 
         # Save the result in a file and store the cache name
         current_id = str(int(time.time()))
-        cache.save_cache(np.array(analysis_result['sentences']),
+        CACHE.save_cache(np.array(analysis_result['sentences']),
                          current_id)
 
         result = {'aggregate': analysis_result['aggregate'].tolist(),
@@ -126,7 +128,7 @@ def analyze_text():
         if get_sentences:
             result['splitted_sentences'] = analysis_result['splitted_sentences']
 
-        result_dict = make_result_dict(result, emo_names=emotion_names,
+        result_dict = make_result_dict(result, emo_names=EMOTION_NAMES,
                                        request_id=str(int(time.time())))
         response_json = jsonify(result_dict)
         return response_json
@@ -134,27 +136,29 @@ def analyze_text():
         raise Exception("Empty input JSON")
 
 
-@app.route('/postprocess', methods=['POST'])
+@APP.route('/postprocess', methods=['POST'])
 def postprocess_result():
     """Postprocess the result of an analysis."""
     req_contents = request.get_json(silent=True)
 
     try:
         text_id = req_contents['text_id']
-        if int(cache.cache_time) != text_id:
-            err_response = make_error_response("Invalid 'text_id', it should be {}".format(cache.cache_time))
+        if int(CACHE.cache_time) != text_id:
+            err_response = make_error_response(
+                "Invalid 'text_id', it should be {}".format(CACHE.cache_time))
             return jsonify(err_response)
 
         try:
             n_harmonics = req_contents['number_of_harmonics']
-            ndarray = cache.load_cache()
+            ndarray = CACHE.load_cache()
             postproc = _postprocess(ndarray, n_harmonics)
 
             result = {'text_id': text_id,
                       'harmonics': _make_postproc_dict(postproc)}
             return jsonify(result)
         except KeyError:
-            err_response = make_error_response("Missing number of harmonics in request")
+            err_response = make_error_response(
+                "Missing number of harmonics in request")
             return jsonify(err_response)
     except KeyError:
         err_response = make_error_response("Missing 'text_id' field.")
@@ -201,8 +205,8 @@ def _make_sent_result(emotions):
         return None
 
     tmp = np.stack(emotions)
-    result = {emotion_names[i]: tmp[:, i].tolist()
-              for i in range(len(emotion_names))}
+    result = {EMOTION_NAMES[i]: tmp[:, i].tolist()
+              for i in range(len(EMOTION_NAMES))}
 
     return result
 
@@ -230,8 +234,8 @@ def _postprocess(data, n_harmonics):
 
     if isinstance(n_harmonics, list):
         return {str(n):
-                    postprocessing.smooth_emotions(data,
-                                                   number_of_harmonics=n)
+                postprocessing.smooth_emotions(data,
+                                               number_of_harmonics=n)
                 for n in n_harmonics}
 
 
@@ -250,9 +254,9 @@ def _make_postproc_dict(postproc):
         dictionary where first-level keys are the numbers of harmonics,
         the second-level keys are the emotion names
     """
-    return {n_harmonics: {emotion_names[j]:
-                              list(map((lambda x: x if x >= 1e-3 else 0),
-                                       postproc[n_harmonics][:, j].tolist()))
+    return {n_harmonics: {EMOTION_NAMES[j]:
+                          list(map((lambda x: x if x >= 1e-3 else 0),
+                                   postproc[n_harmonics][:, j].tolist()))
                           for j in range(postproc[n_harmonics].shape[1])}
             for n_harmonics in postproc}
 
@@ -283,22 +287,22 @@ def _analyze(text, sent_list=False, sent_strs=False, lex_version='base',
         preprocess text before NLTK tokenization, strip all dialog delimiters
         and substitute weak punctuation with full stops
     """
-    tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
-                            TAGDIR=cmgr.get_treetagger_path())
+    tagger = ttw.TreeTagger(TAGLANG=LANGUAGE.lower()[0:2],
+                            TAGDIR=CMGR.get_treetagger_path())
 
     if lex_version == 'base':
-        lex = emolex
+        lex = EMOLEX
     elif lex_version == 'enhanced':
-        lex = emolex_enhanced
+        lex = EMOLEX_ENHANCED
     else:
-        lex = emolex
+        lex = EMOLEX
 
     if use_filter:
-        analyzer = syuzhet.SyuzhetWithFilter(language, tagger,
-                                             emotions_array_length, lex)
+        analyzer = syuzhet.SyuzhetWithFilter(LANGUAGE, tagger,
+                                             EMOTIONS_ARRAY_LENGTH, lex)
     else:
-        analyzer = syuzhet.SyuzhetNoFilter(language, tagger,
-                                           emotions_array_length, lex)
+        analyzer = syuzhet.SyuzhetNoFilter(LANGUAGE, tagger,
+                                           EMOTIONS_ARRAY_LENGTH, lex)
 
     analysis_result = analyzer.analyze_text(text,
                                             get_sentences=sent_list,
@@ -325,16 +329,16 @@ def _convert_result_to_list(data):
     Utility for postprocessing.
     """
 
-    def ffun(k, v):
-        if k == 'aggregate':
-            return v.tolist()
-        elif k == 'sentences':
-            return [x.tolist() for x in v]
-        else:
-            return v
+    def ffun(key, value):
+        if key == 'aggregate':
+            return value.tolist()
+        elif key == 'sentences':
+            return [x.tolist() for x in value]
+
+        return value
 
     return {key: ffun(key, val) for key, val in data}
 
 
 if __name__ == "__main__":
-    app.run()
+    APP.run()
