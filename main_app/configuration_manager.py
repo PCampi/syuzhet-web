@@ -4,18 +4,18 @@ import platform
 import json
 from path_problem_resolver import get_absolute_path
 
-config_file = "config.json"
+CONFIG_FILE = "config.json"
 
 
 class ConfigurationManager():
     """Manager of configuration objects."""
 
-    def __init__(self, path_to_file=config_file):
+    def __init__(self, path_to_file=CONFIG_FILE):
         """Init."""
         self.path_to_file = get_absolute_path(path_to_file)
         self.conf_dict = None
 
-    def load_config(self, path_to_file=config_file):
+    def load_config(self, path_to_file=CONFIG_FILE):
         """Load the configuration file from the specified path."""
         if path_to_file:
             self.path_to_file = get_absolute_path(path_to_file)

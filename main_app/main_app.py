@@ -42,7 +42,7 @@ CACHE = persistence.PersistencyManager()
 
 # Main application
 APP = Flask(__name__)
-CORS(APP)
+CORS(app=APP)
 
 
 @APP.route('/', methods=['GET'])
