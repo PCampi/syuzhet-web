@@ -107,3 +107,4 @@ main_app/syuzhet/treetagger-mac
 
 profile-gunicorn.sh
 .env
+.vscode/tags
