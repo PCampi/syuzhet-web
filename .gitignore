@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 .mypy_cache
+.vscode/tags
+cache-*
 
 # C extensions
 *.so
@@ -102,7 +104,8 @@ ENV/
 .imdone
 translate_emolex
 
-syuzhet/treetagger-mac
+main_app/syuzhet/treetagger-mac
 
 profile-gunicorn.sh
 .env
+.vscode/tags
