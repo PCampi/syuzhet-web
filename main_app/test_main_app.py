@@ -18,6 +18,7 @@ class MainAppUnitTest(unittest.TestCase):
         payload = self.input_for_lemmatize("Questo è il testo da lemmatizzare. " +
                                            "Dovresti ritornarlo con i lemmi soltanto, grazie.")
         req = requests.post(url, json=payload)
+        req.raise_for_status()
 
         computed = req.json()
         expected = {
@@ -36,6 +37,7 @@ class MainAppUnitTest(unittest.TestCase):
 
         payload_no_stopwords = self.input_for_lemmatize(text)
         req_no_stopwords = requests.post(url, json=payload_no_stopwords)
+        req_no_stopwords.raise_for_status()
 
         computed = req_no_stopwords.json()
         expected = {
@@ -50,6 +52,7 @@ class MainAppUnitTest(unittest.TestCase):
         payload_with_stopwords = self.input_for_lemmatize(
             text, delete_stopwords=False)
         req_with_stopwords = requests.post(url, json=payload_with_stopwords)
+        req_with_stopwords.raise_for_status()
 
         computed = req_with_stopwords.json()
         expected = {
