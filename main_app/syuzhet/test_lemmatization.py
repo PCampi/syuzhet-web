@@ -14,7 +14,6 @@ class LemmatizerUnitTest(unittest.TestCase):
     def setUpClass(cls):
         super(LemmatizerUnitTest, cls).setUpClass()
         cmgr = configuration_manager.ConfigurationManager("config.json")
-        cmgr.load_config()
 
         cls.language = cmgr.get_default_language()
         cls.emo_arr_len = cmgr.get_emotion_array_length()
