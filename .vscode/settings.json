@@ -1,0 +1,7 @@
+{
+    "python.pythonPath": "/Users/pietro/.pyenv/versions/3.6.0/bin/python",
+    "python.unitTest.pyTestArgs": [
+        "."
+    ],
+    "python.unitTest.pyTestEnabled": true
+}

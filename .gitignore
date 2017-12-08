@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.mypy_cache
+.vscode/tags
+cache-*
 
 # C extensions
 *.so
@@ -99,13 +102,10 @@ ENV/
 
 # Imdone Atom plugin
 .imdone
-
-# Visual Studio Code files
-.vscode
-
 translate_emolex
 
-syuzhet/treetagger-mac
+main_app/syuzhet/treetagger-mac
 
 profile-gunicorn.sh
 .env
+.vscode/tags
