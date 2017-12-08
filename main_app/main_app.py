@@ -169,7 +169,7 @@ def postprocess_result():
 
 
 @APP.route('/lemmatize', methods=['POST'])
-def lemmatize_input():
+def lemmatize():
     """Lemmatize a text given in the input JSON."""
     req_contents = request.get_json(silent=True)
 
@@ -192,16 +192,18 @@ def lemmatize_input():
             return sentence_to_words(sentence, LANGUAGE)
 
         sentences = map(mapfun, splitted_into_sentences)
-        lemmatized_sentences = [lemmatizer.lemmatize(s)
-                                for s in sentences]
+        lemmatized_sentences = [lemmatizer.lemmatize(s) for s in sentences]
 
         if delete_stopwords:
             stop_words = set(stopwords.words("italian"))
             stop_words_punct = stop_words.union(
                 {",", ";", ".", ":", "?", "!", "'"})
-            filtered_sentences_no_stopwords = \
-                [list(filter((lambda x: x not in stop_words_punct), sentence))
-                 for sentence in lemmatized_sentences]
+
+            filtered_sentences_no_stopwords = [
+                [word for word in sentence if word not in stop_words_punct]
+                for sentence in lemmatized_sentences
+            ]
+
             response = {"sentences": filtered_sentences_no_stopwords}
         else:
             response = {"sentences": lemmatized_sentences}
