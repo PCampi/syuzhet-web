@@ -13,6 +13,7 @@ from .path_problem_resolver import get_absolute_path
 from . import persistence
 from . import postprocessing
 from . import syuzhet
+from .text_processing import text_to_sentences, sentence_to_words
 
 CONFIG_FILE_PATH = get_absolute_path("config.json")
 
@@ -167,7 +168,7 @@ def postprocess_result():
         return jsonify(err_response)
 
 
-@app.route('/lemmatize', methods=['POST'])
+@APP.route('/lemmatize', methods=['POST'])
 def lemmatize_input():
     """Lemmatize a text given in the input JSON."""
     req_contents = request.get_json(silent=True)
@@ -180,19 +181,24 @@ def lemmatize_input():
         except KeyError:
             delete_stopwords = True
 
-        tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
-                                TAGDIR=cmgr.get_treetagger_path())
+        tagger = ttw.TreeTagger(TAGLANG=LANGUAGE.lower()[0:2],
+                                TAGDIR=CMGR.get_treetagger_path())
         lemmatizer = syuzhet.Lemmatizer(tagger)
-        splitter = syuzhet.TextSplitter(language)
 
-        splitted_into_sentences = splitter.text_to_sentences(text)
-        sentences = map(splitter.sentence_to_words, splitted_into_sentences)
+        splitted_into_sentences = text_to_sentences(text, LANGUAGE)
+
+        def mapfun(sentence):
+            """Map function for sentence_to_words."""
+            return sentence_to_words(sentence, LANGUAGE)
+
+        sentences = map(mapfun, splitted_into_sentences)
         lemmatized_sentences = [lemmatizer.lemmatize(s)
                                 for s in sentences]
 
         if delete_stopwords:
             stop_words = set(stopwords.words("italian"))
-            stop_words_punct = stop_words.union({",", ";", ".", ":", "?", "!", "'"})
+            stop_words_punct = stop_words.union(
+                {",", ";", ".", ":", "?", "!", "'"})
             filtered_sentences_no_stopwords = \
                 [list(filter((lambda x: x not in stop_words_punct), sentence))
                  for sentence in lemmatized_sentences]

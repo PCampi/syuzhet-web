@@ -14,6 +14,9 @@ def text_to_sentences(text: str, language: str) -> List[str]:
     text:
         the text to tokenize into sentences
 
+    language: str
+        language of the text, i.e. 'italian', 'english', 'french'
+
     Returns
     -------
     List[str]:
@@ -34,6 +37,9 @@ def sentence_to_words(sentence: str, language: str) -> List[str]:
     ----------
     sentence: str
         a string representing a single sentence
+
+    language: str
+        language of the text, i.e. 'italian', 'english', 'french'
 
     Returns
     -------
