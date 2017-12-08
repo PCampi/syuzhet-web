@@ -7,6 +7,7 @@ import numpy as np
 import treetaggerwrapper as ttw
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
+from nltk.corpus import stopwords
 
 from .path_problem_resolver import get_absolute_path
 from . import persistence
@@ -163,6 +164,45 @@ def postprocess_result():
             return jsonify(err_response)
     except KeyError:
         err_response = make_error_response("Missing 'text_id' field.")
+        return jsonify(err_response)
+
+
+@app.route('/lemmatize', methods=['POST'])
+def lemmatize_input():
+    """Lemmatize a text given in the input JSON."""
+    req_contents = request.get_json(silent=True)
+
+    try:
+        text = req_contents["text"]
+
+        try:
+            delete_stopwords = req_contents["delete_stopwords"]
+        except KeyError:
+            delete_stopwords = True
+
+        tagger = ttw.TreeTagger(TAGLANG=language.lower()[0:2],
+                                TAGDIR=cmgr.get_treetagger_path())
+        lemmatizer = syuzhet.Lemmatizer(tagger)
+        splitter = syuzhet.TextSplitter(language)
+
+        splitted_into_sentences = splitter.text_to_sentences(text)
+        sentences = map(splitter.sentence_to_words, splitted_into_sentences)
+        lemmatized_sentences = [lemmatizer.lemmatize(s)
+                                for s in sentences]
+
+        if delete_stopwords:
+            stop_words = set(stopwords.words("italian"))
+            stop_words_punct = stop_words.union({",", ";", ".", ":", "?", "!", "'"})
+            filtered_sentences_no_stopwords = \
+                [list(filter((lambda x: x not in stop_words_punct), sentence))
+                 for sentence in lemmatized_sentences]
+            response = {"sentences": filtered_sentences_no_stopwords}
+        else:
+            response = {"sentences": lemmatized_sentences}
+
+        return jsonify(response)
+    except KeyError:
+        err_response = make_error_response("Missing text to lemmatize.")
         return jsonify(err_response)
 
 

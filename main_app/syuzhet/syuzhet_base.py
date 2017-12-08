@@ -109,14 +109,14 @@ class SyuzhetABC(ABC):
                 emotions = self.emolex[word]
                 if len(emotions) == 1:
                     return np.sum(emotions[0]) > 0
+                else:
+                    has_value = False
+                    i = 0
+                    while (i < len(emotions)) and (not has_value):
+                        has_value = np.sum(emotions[i]) > 0
+                        i = i + 1
 
-                has_value = False
-                i = 0
-                while (i < len(emotions)) and (not has_value):
-                    has_value = np.sum(emotions[i]) > 0
-                    i = i + 1
-
-                return has_value
+                    return has_value
             except KeyError:
                 return False
 

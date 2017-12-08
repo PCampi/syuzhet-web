@@ -10,7 +10,7 @@ from .syuzhet_base import SyuzhetABC
 
 
 class SyuzhetWithFilter(SyuzhetABC):
-    """Syuzhet text analyzer class, no filter version."""
+    """Syuzhet text analyzer class, with filter word filtering."""
 
     def emotions_for_sentence(self, sentence: List[str]):
         """Get the emotions for a sentence.
