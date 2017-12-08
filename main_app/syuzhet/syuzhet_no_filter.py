@@ -1,4 +1,8 @@
+"""Syuzhet module with no filter."""
+
 from functools import reduce
+from typing import List
+
 import numpy as np
 
 from .syuzhet_base import SyuzhetABC
@@ -7,7 +11,7 @@ from .syuzhet_base import SyuzhetABC
 class SyuzhetNoFilter(SyuzhetABC):
     """Syuzhet text analyzer class, no filter version."""
 
-    def emotions_for_sentence(self, sentence):
+    def emotions_for_sentence(self, sentence: List[str]):
         """Get the emotions for a sentence.
 
         Parameters
@@ -20,7 +24,7 @@ class SyuzhetNoFilter(SyuzhetABC):
         np.ndarray
             an array of emotions for the sentence.
         """
-        if len(sentence) == 0:
+        if sentence == []:
             return np.zeros((self.emotions_array_length,),
                             dtype=np.int16)
 

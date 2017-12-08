@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 .mypy_cache
 .vscode/tags
+cache-*
 
 # C extensions
 *.so

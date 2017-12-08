@@ -2,7 +2,7 @@
 import unittest
 import treetaggerwrapper as ttw
 
-from configuration_manager import ConfigurationManager
+from ..persistence import configuration_manager
 from .splitting import TextSplitter
 from .lemmatization import Lemmatizer
 
@@ -13,7 +13,7 @@ class LemmatizerUnitTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(LemmatizerUnitTest, cls).setUpClass()
-        cmgr = ConfigurationManager("config.json")
+        cmgr = configuration_manager.ConfigurationManager("config.json")
         cmgr.load_config()
 
         cls.language = cmgr.get_default_language()

@@ -1,11 +1,13 @@
 """Main Syuzhet module."""
+
 from abc import ABC, abstractmethod
-from typing import List
 from functools import reduce
 from itertools import tee
+from typing import List
+
 import numpy as np
 
-from .splitting import TextSplitter
+from ..text_processing import sentence_to_words, text_to_sentences
 from .lemmatization import Lemmatizer
 from .preprocessing import preprocess_for_analysis
 
@@ -19,9 +21,8 @@ class SyuzhetABC(ABC):
         self.tagger = tagger
         self.emotions_array_length = emotions_array_length
         self.emolex = emolex
-        self.splitter = TextSplitter(self.language)
 
-    def analyze_text(self, text, get_sentences=False,
+    def analyze_text(self, text: str, get_sentences=False,
                      return_sentence_str=False, preprocess=False):
         """Extract emotions from a text.
 
@@ -51,17 +52,19 @@ class SyuzhetABC(ABC):
         """
         if preprocess:
             preprocessed_text = preprocess_for_analysis(text)
-            sentences_str = self.splitter.text_to_sentences(preprocessed_text)
+            sentences_str = text_to_sentences(preprocessed_text,
+                                              language=self.language)
         else:
-            sentences_str = self.splitter.text_to_sentences(text)
+            sentences_str = text_to_sentences(text,
+                                              language=self.language)
 
         if get_sentences:
             orig_sentences, to_lemmatize, sent_to_return = tee(
-                (self.splitter.sentence_to_words(s)
+                (sentence_to_words(s, self.language)
                  for s in sentences_str), 3)
         else:
             orig_sentences, to_lemmatize = tee(
-                self.splitter.sentence_to_words(s)
+                sentence_to_words(s, self.language)
                 for s in sentences_str)
 
         # get the lemmatized sentences
@@ -121,7 +124,7 @@ class SyuzhetABC(ABC):
         return result
 
     @abstractmethod
-    def emotions_for_sentence(self, sentence):
+    def emotions_for_sentence(self, sentence: List[str]):
         """Main method."""
         pass
 

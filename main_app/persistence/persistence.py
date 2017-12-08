@@ -1,10 +1,12 @@
 """Persistency functions"""
 
 import numpy as np
-from path_problem_resolver import get_absolute_path
+from ..path_problem_resolver import get_absolute_path
 
 
 class PersistencyManager:
+    """Persistency manager class."""
+
     def __init__(self):
         self.__cache_name = ""
         self.cache_time = ""

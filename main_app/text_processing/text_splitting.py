@@ -1,7 +1,9 @@
 """Sentence processing module."""
+
 from typing import List
-import nltk.tokenize
+
 import nltk.data
+import nltk.tokenize
 
 
 def text_to_sentences(text: str, language: str) -> List[str]:

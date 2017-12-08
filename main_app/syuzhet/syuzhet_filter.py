@@ -1,14 +1,18 @@
+"""Syuzhet module with smart emotion filter."""
+
 from functools import reduce
+from typing import List
+
 import numpy as np
 
-from .syuzhet_base import SyuzhetABC
 from .emotion_filter import choose_emotions
+from .syuzhet_base import SyuzhetABC
 
 
 class SyuzhetWithFilter(SyuzhetABC):
     """Syuzhet text analyzer class, no filter version."""
 
-    def emotions_for_sentence(self, sentence):
+    def emotions_for_sentence(self, sentence: List[str]):
         """Get the emotions for a sentence.
 
         Parameters
@@ -26,10 +30,10 @@ class SyuzhetWithFilter(SyuzhetABC):
 
         if n > 2:
             frst_part = choose_emotions(from_emolex[:3], 0)
-            last_part = choose_emotions(from_emolex[n-3:], 2)
+            last_part = choose_emotions(from_emolex[n - 3:], 2)
 
-            seq = map((lambda i: choose_emotions(from_emolex[i-1:i+2], 1)),
-                      range(1, n-1))
+            seq = map((lambda i: choose_emotions(from_emolex[i - 1:i + 2], 1)),
+                      range(1, n - 1))
 
             central_part = reduce(np.add, seq)
 
@@ -41,6 +45,6 @@ class SyuzhetWithFilter(SyuzhetABC):
             result = choose_emotions(from_emolex, 0)
         elif n == 2:
             result = choose_emotions(from_emolex, 0) +\
-                     choose_emotions(from_emolex, 1)
+                choose_emotions(from_emolex, 1)
 
         return result

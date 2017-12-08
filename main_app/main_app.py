@@ -8,14 +8,15 @@ import treetaggerwrapper as ttw
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 
-import persistence
-import postprocessing
-import syuzhet
-from configuration_manager import ConfigurationManager
-from path_problem_resolver import get_absolute_path
+from .path_problem_resolver import get_absolute_path
+from . import persistence
+from . import postprocessing
+from . import syuzhet
 
-CMGR = ConfigurationManager("config.json")
-CMGR.load_config()
+CONFIG_FILE_PATH = get_absolute_path("config.json")
+
+CMGR = persistence.configuration_manager.ConfigurationManager(CONFIG_FILE_PATH)
+# CMGR = ConfigurationManager("config.json")
 
 LANGUAGE = CMGR.get_default_language()
 EMOTIONS_ARRAY_LENGTH = CMGR.get_emotion_array_length()
@@ -330,6 +331,7 @@ def _convert_result_to_list(data):
     """
 
     def ffun(key, value):
+        """Mapfun."""
         if key == 'aggregate':
             return value.tolist()
         elif key == 'sentences':
