@@ -1,7 +1,7 @@
 Flask==1.0
 Flask-Cors==3.0.2
 Jinja2==2.10.1
-Werkzeug==0.12.1
+Werkzeug==0.15.3
 click==6.7
 gunicorn==19.7.1
 nltk==3.2.2
